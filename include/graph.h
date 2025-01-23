@@ -52,19 +52,30 @@ void free_adj_graph(AG*);
 
 
 /*
+ * Initializes an adjacency list graph from a file.
+ * @param `filename`: path to the file
+ * @return `AG*`: pointer to the graph
+ * @note The file must have the following format:
+ *      - The first line contains the number of vertices `V` and the number of edges `E`
+ *      - The following `E` lines contain the source vertex, destination vertex, and weight of each edge
+*/
+AG* init_from_file(const char*);
+
+
+/*
 * Graph in CSR (Compressed Sparse Row) format.
 * @attr `dest`: array of size `|E|` mapping each edge to its destination vertex
 * @attr `w`: array of size `|E|` mapping each edge to its weight
 * @attr `fe`: array of size `|V|` mapping each vertex to its first edge
 * @attr `od`: array of size `|V|` mapping each vertex to its out degree
 */
-typedef struct Graph {
+typedef struct CSR_Graph {
   int V, E;
   int *dest;
   int *w;
   int *fe;
   int *od;
-} G;
+} CSRG;
 
 /*
   * Initializes a graph with `V` vertices and `E` edges.
@@ -72,20 +83,20 @@ typedef struct Graph {
   * @param `E`: number of edges
   * @return `G*`: pointer to the graph
 */
-G* init_graph(const int, const int);
+CSRG* init_csr_graph(const int, const int);
 
 /*
   * Frees the memory allocated for the graph.
   * @param `g`: pointer to the graph
 */
-void free_graph(G*);
+void free_csr_graph(CSRG*);
 
 /*
   * Clones the graph `g`.
   * @param `g`: pointer to the graph
   * @return `G*`: pointer to the cloned graph
 */
-G* clone_graph(G*);
+CSRG* clone_csr_graph(CSRG*);
 
 
 #endif // !GRAPH_H

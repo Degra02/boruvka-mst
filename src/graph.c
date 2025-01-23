@@ -1,9 +1,9 @@
+#include "../include/graph.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "../include/graph.h"
 
-G* init_graph(const int V, const int E) {
-  G* g = (G*)malloc(sizeof(G));
+AG *init_adj_graph(const int V, const int E) {
+  AG *g = (AG *)malloc(sizeof(AG));
   if (g == NULL) {
     fprintf(stderr, "Error: unable to allocate memory for graph\n");
     exit(1);
@@ -12,10 +12,55 @@ G* init_graph(const int V, const int E) {
   g->V = V;
   g->E = E;
 
-  g->dest = (int*)malloc(E * sizeof(int));
-  g->w = (int*)malloc(E * sizeof(int));
-  g->fe = (int*)malloc(V * sizeof(int));
-  g->od = (int*)malloc(V * sizeof(int));
+  g->edges = (Edge *)malloc(E * sizeof(Edge));
+  if (g->edges == NULL) {
+    fprintf(stderr, "Error: unable to allocate memory for graph\n");
+    exit(1);
+  }
+
+  return g;
+}
+
+void free_adj_graph(AG *g) {
+  free(g->edges);
+  free(g);
+}
+
+AG *init_from_file(const char *filename) {
+  FILE *file = fopen(filename, "r");
+  if (file == NULL) {
+    fprintf(stderr, "Error: unable to open file\n");
+    exit(1);
+  }
+
+  int V, E;
+  fscanf(file, "%d %d", &V, &E);
+  AG *g = init_adj_graph(V, E);
+
+  for (int i = 0; i < E; i++) {
+    fscanf(file, "%d %d %d", &g->edges[i].src, &g->edges[i].dest,
+           &g->edges[i].w);
+  }
+
+  fclose(file);
+
+  return g;
+}
+
+CSRG *init_csr_graph(const int V, const int E) {
+  CSRG *g = (CSRG *)malloc(sizeof(CSRG));
+  if (g == NULL) {
+    fprintf(stderr, "Error: unable to allocate memory for graph\n");
+    exit(1);
+  }
+
+  g->V = V;
+  g->E = E;
+
+  g->dest = (int *)malloc(E * sizeof(int));
+  g->w = (int *)malloc(E * sizeof(int));
+  g->fe = (int *)malloc(V * sizeof(int));
+  g->od = (int *)malloc(V * sizeof(int));
 
   if (g->dest == NULL || g->w == NULL || g->fe == NULL || g->od == NULL) {
     fprintf(stderr, "Error: unable to allocate memory for graph\n");
@@ -25,7 +70,7 @@ G* init_graph(const int V, const int E) {
   return g;
 }
 
-void free_graph(G* g) {
+void free_csr_graph(CSRG *g) {
   free(g->dest);
   free(g->w);
   free(g->fe);
@@ -33,8 +78,8 @@ void free_graph(G* g) {
   free(g);
 }
 
-G* clone_graph(G* g) {
-  G* clone = init_graph(g->V, g->E);
+CSRG *clone_graph(CSRG *g) {
+  CSRG *clone = init_csr_graph(g->V, g->E);
 
   for (int i = 0; i < g->E; i++) {
     clone->dest[i] = g->dest[i];

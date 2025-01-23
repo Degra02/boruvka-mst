@@ -3,16 +3,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-MFSet* init_mfset(const int n) {
-  MFSet* mfset = (MFSet*)malloc(sizeof(MFSet));
+MFSet *init_mfset(const int n) {
+  MFSet *mfset = (MFSet *)malloc(sizeof(MFSet));
   if (mfset == NULL) {
     fprintf(stderr, "Error: unable to allocate memory for Disjoint Set\n");
     exit(1);
   }
 
   mfset->n = n;
-  mfset->parent = (int*)malloc(n * sizeof(int));
-  mfset->rank = (int*)malloc(n * sizeof(int));
+  mfset->parent = (int *)malloc(n * sizeof(int));
+  mfset->rank = (int *)malloc(n * sizeof(int));
 
   if (mfset->parent == NULL || mfset->rank == NULL) {
     fprintf(stderr, "Error: unable to allocate memory for Disjoint Set\n");
@@ -27,7 +27,7 @@ MFSet* init_mfset(const int n) {
   return mfset;
 }
 
-void free_mfset(MFSet* mfset) {
+void free_mfset(MFSet *mfset) {
   free(mfset->parent);
   free(mfset->rank);
   free(mfset);
