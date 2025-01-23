@@ -11,6 +11,9 @@ OBJS = $(SRCS:.c=.o)
 
 TARGET = mst
 
+# processors
+NP = 1
+
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
@@ -18,6 +21,9 @@ $(TARGET): $(OBJS)
 
 %.o: %.c
 	$(CC) -c $< -o $@ -I$(INC_DIR)
+
+run: $(TARGET)
+	mpirun -np $(NP) ./$(TARGET)
 
 clean:
 	rm -f $(OBJS) $(TARGET)
