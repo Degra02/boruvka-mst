@@ -5,8 +5,13 @@
 #include "../include/mst.h"
 #include "../include/utils.h"
 
-#define CREATE_GRAPH 0
-#define V_GEN 1000
+#ifndef GEN
+  #define GEN 0
+#endif
+
+// #ifndef V_GEN
+//   #define V_GEN 1000
+// #endif
 
 int main(int argc, char *argv[]) {
   if (argc != 3) {
@@ -14,7 +19,10 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  if (CREATE_GRAPH) generate_complete_graph(V_GEN, argv[1]);
+  if (GEN > 0) {
+    printf("Generating complete graph with %d vertices.\n", GEN);
+    generate_complete_graph(GEN, argv[1]);
+  } 
 
   int rank, size;
   MPI_Init(&argc, &argv);
@@ -42,11 +50,3 @@ int main(int argc, char *argv[]) {
   MPI_Finalize();
   return 0;
 }
-
-/*
-  printf("Minimum Spanning Tree:\n");
-  for (int i = 0; i < mst->E; i++) {
-    Edge e = mst->edges[i];
-    printf("%d -- %d == %d\n", e.src, e.dest, e.w);
-  }
-*/

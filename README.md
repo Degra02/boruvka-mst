@@ -4,22 +4,16 @@ The following is a parallel implementation of Boruvka's algorithm using MPI and 
 
 
 ## How to run
-The code can be compiled using CMake. Firstly, create a build directory and run CMake from there:
-```bash
-mkdir build
-cd build
-cmake ..
-```
-
-Some options can be passed to CMake to configure the build:
-- `-DNP=<procs>`: Number of processes to use in the MPI execution.
-- `-DINPUT="../path/to/input/file"`: Path to the input file.
-- `-DOUTPUT="../path/to/output/file"`: Path to the output file.
-
-Then, compile the code using make:
+The code can be compiled using the provided `Makefile`:
 ```bash
 make
 ```
+
+Some options can be passed to `make`:
+- `GEN=<num>`: Generate a random graph with `<num>` vertices and edges. The default value is 0, meaning that a preexisting `graph.txt` file will be used.
+- `INPUT=/path/to/file`: Use a custom input file. The default value is `graph.txt`.
+- `OUTPUT=/path/to/file`: Use a custom output file. The default value is `mst.txt`.
+
 
 Finally, run the code using `mpirun` or via `make`:
 ```bash
@@ -29,3 +23,8 @@ mpirun -np <procs> ./mst <input_file> <output_file>
 make run
 ```
 
+When running with `make`, the number of processes can be set using the `NP` variable:
+```bash
+make run NP=<procs>
+```
+Here, also the `GEN`, `INPUT`, and `OUTPUT` variables can be set, since the `run` target triggers a `clean` before being executed.
