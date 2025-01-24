@@ -14,6 +14,9 @@ TARGET = mst
 # processors
 NP = 1
 
+INPUT = "graph.txt"
+OUTPUT = "mst.txt"
+
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
@@ -23,7 +26,7 @@ $(TARGET): $(OBJS)
 	$(CC) -c $< -o $@ -I$(INC_DIR)
 
 run: $(TARGET)
-	mpirun -np $(NP) ./$(TARGET)
+	mpirun -np $(NP) ./$(TARGET) $(INPUT) $(OUTPUT)
 
 clean:
 	rm -f $(OBJS) $(TARGET)

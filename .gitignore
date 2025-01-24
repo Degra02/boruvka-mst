@@ -1,1 +1,7 @@
 **/*.o
+mst
+
+data/*
+graph.txt
+big-graph.txt
+mst.txt

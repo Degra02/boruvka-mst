@@ -6,9 +6,10 @@
 /*
 * Adjacency list implementation
 * @param `g`: pointer to the original graph
+* @param `mst`: pointer to the minimum spanning tree
 * @return `AG*`: pointer to the minimum spanning tree
 */
-AG* adj_boruvka(AG*);
+void adj_boruvka(AG*, AG*);
 
 // void find_min_edge(CSRG*);
 // void remove_mirror_edges(CSRG*);

@@ -25,6 +25,14 @@ typedef struct Edge {
   int src, dest, w;
 } Edge;
 
+
+/*
+ * Clones the edge `e`.
+ * @param `e`: pointer to the edge
+ * @return `Edge`: cloned edge
+*/
+Edge clone_edge(Edge*);
+
 /*
  * Graph in adjacency list format.
  * @attr `V`: number of vertices
@@ -60,6 +68,14 @@ void free_adj_graph(AG*);
  *      - The following `E` lines contain the source vertex, destination vertex, and weight of each edge
 */
 AG* init_from_file(const char*);
+
+
+/*
+ * Prints the adjacency list graph `g` to the specified file.
+ * @param `g`: pointer to the graph
+ * @param `filename`: path to the file
+*/
+void print_file_adj_graph(AG*, const char*);
 
 
 /*
