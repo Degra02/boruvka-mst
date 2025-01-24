@@ -3,28 +3,31 @@ import random
 import sys
 
 
-def generate_connected_graph(num_nodes, num_edges):
-    while True:
-        G = nx.gnm_random_graph(num_nodes, num_edges)
-        if nx.is_connected(G):
-            break
-    # Assign random weights to edges
+def gen_graph(V, E):
+    # while True:
+    #     G = nx.gnm_random_graph(V, E)
+    #     if nx.is_connected(G):
+    #         break
+        
+    # G = nx.erdos_renyi_graph(V, 0.8, directed=False)
+    G = nx.fast_gnp_random_graph(V, 0.8, directed=False)
+
     for (u, v) in G.edges():
-        G[u][v]['weight'] = random.randint(1, 10)  # Adjust weight range as needed
+        G[u][v]['weight'] = random.randint(1, 500)
     return G
 
 
 
 if __name__ == "__main__":
-    num_nodes = int(sys.argv[1]) 
-    num_edges = int(sys.argv[2])
+    V = int(sys.argv[1])
+    E = int(sys.argv[2])
 
-    G = generate_connected_graph(num_nodes, num_edges)
+    G = gen_graph(V, E)
 
     with open("graph.txt", "wb") as f:
-        f.write(f"{num_nodes} {num_edges}\n".encode())
+        f.write(f"{V} {E}\n".encode())
         nx.write_weighted_edgelist(G, f)
 
 
-    
+
 

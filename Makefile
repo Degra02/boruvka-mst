@@ -14,6 +14,8 @@ TARGET = mst
 # processors
 NP = 1
 
+PROCS = 1 2 4 8
+
 INPUT = "graph.txt"
 OUTPUT = "mst.txt"
 
@@ -27,6 +29,15 @@ $(TARGET): $(OBJS)
 
 run: $(TARGET)
 	mpirun -np $(NP) ./$(TARGET) $(INPUT) $(OUTPUT)
+
+
+test: $(TARGET)
+	@for p in $(PROCS); do \
+		echo "$$p processors..."; \
+		echo "Command: mpirun -np $$p ./$(TARGET) $(INPUT) $(OUTPUT)"; \
+		mpirun -np $$p ./$(TARGET) $(INPUT) $(OUTPUT); \
+		echo; \
+	done;
 
 clean:
 	rm -f $(OBJS) $(TARGET)
