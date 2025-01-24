@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "../include/graph.h"
 #include "../include/mst.h"
+#include "../include/utils.h"
 
 int main(int argc, char *argv[]) {
   if (argc != 3) {
@@ -15,6 +16,10 @@ int main(int argc, char *argv[]) {
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+  // if (rank == 0) {
+  //   generate_complete_graph(1000, argv[1]);
+  // }
 
   AG *g = init_from_file(argv[1]);
   AG *mst = init_adj_graph(g->V, g->V - 1);

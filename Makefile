@@ -4,6 +4,9 @@ CFLAGS = -Wall -Wextra -lm
 SRC_DIR = src
 INC_DIR = include
 
+# igraph
+IGRAPH = /usr/local/include/igraph
+
 # source files
 SRCS = $(wildcard $(SRC_DIR)/*.c)
 # object files
@@ -13,8 +16,6 @@ TARGET = mst
 
 # processors
 NP = 1
-
-PROCS = 1 2 4 8
 
 INPUT = "graph.txt"
 OUTPUT = "mst.txt"
@@ -32,7 +33,7 @@ run: $(TARGET)
 
 
 test: $(TARGET)
-	@for p in $(PROCS); do \
+	@for p in {1..8}; do \
 		echo "$$p processors..."; \
 		echo "Command: mpirun -np $$p ./$(TARGET) $(INPUT) $(OUTPUT)"; \
 		mpirun -np $$p ./$(TARGET) $(INPUT) $(OUTPUT); \
