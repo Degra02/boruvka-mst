@@ -5,21 +5,21 @@
 #include "../include/mst.h"
 #include "../include/utils.h"
 
+#define CREATE_GRAPH 0
+#define V_GEN 1000
+
 int main(int argc, char *argv[]) {
   if (argc != 3) {
     fprintf(stderr, "Usage: %s <graph-file> <output-file>\n", argv[0]);
     exit(1);
   }
 
-  int rank, size;
+  if (CREATE_GRAPH) generate_complete_graph(V_GEN, argv[1]);
 
+  int rank, size;
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
-
-  // if (rank == 0) {
-  //   generate_complete_graph(1000, argv[1]);
-  // }
 
   AG *g = init_from_file(argv[1]);
   AG *mst = init_adj_graph(g->V, g->V - 1);

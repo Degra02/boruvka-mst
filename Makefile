@@ -1,11 +1,15 @@
 CC = mpicc
-CFLAGS = -Wall -Wextra -lm
+CFLAGS = -Wall -Wextra
 
 SRC_DIR = src
 INC_DIR = include
 
 # igraph
-IGRAPH = /usr/local/include/igraph
+IGRAPH_LIB_DIR = /usr/local/lib
+IGRAPH_INC_DIR = /usr/local/include/igraph
+
+MPI_LIBS = $(shell mpicc --showme:link)
+LIBS = -ligraph -larpack -lm
 
 # source files
 SRCS = $(wildcard $(SRC_DIR)/*.c)
@@ -22,11 +26,14 @@ OUTPUT = "mst.txt"
 
 all: $(TARGET)
 
+# $(TARGET): $(OBJS)
+# 	$(CC) -o $@ $^ $(CFLAGS)
+
 $(TARGET): $(OBJS)
-	$(CC) -o $@ $^ $(CFLAGS)
+	$(CC) -o $@ $^ $(CFLAGS) -I$(IGRAPH_INC_DIR) -L$(IGRAPH_LIB_DIR) $(LIBS) $(MPI_LIBS)
 
 %.o: %.c
-	$(CC) -c $< -o $@ -I$(INC_DIR)
+	$(CC) -c $< -o $@ -I$(INC_DIR) -I$(IGRAPH_INC_DIR)
 
 run: $(TARGET)
 	mpirun -np $(NP) ./$(TARGET) $(INPUT) $(OUTPUT)

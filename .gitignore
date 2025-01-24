@@ -5,5 +5,3 @@ data/*
 graph.txt
 big-graph.txt
 mst.txt
-
-build/
