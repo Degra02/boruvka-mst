@@ -4,6 +4,7 @@
 #include "../include/graph.h"
 #include "../include/mst.h"
 #include "../include/utils.h"
+#include <time.h>
 
 #ifndef GEN
   #define GEN 0
@@ -14,6 +15,7 @@
 #endif
 
 int main(int argc, char *argv[]) {
+  srand(time(NULL));
   if (argc != 3) {
     fprintf(stderr, "Usage: %s <graph-file> <output-file>\n", argv[0]);
     exit(1);
@@ -29,16 +31,24 @@ int main(int argc, char *argv[]) {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  AG *g = &( AG ) { .V=0, .E=0, .edges=NULL};
-  AG *mst = &( AG ) { .V=0, .E=0, .edges=NULL};
+  AG *g = NULL;
+  AG *mst = NULL;
 
   // FIX: Load graph only in rank 0
   // Currently the program crashes if the graph is not loaded in all ranks
-  // if (rank == 0) {
-  g = init_from_file(argv[1]);
-  mst = init_adj_graph(g->V, g->V - 1);
-  printf("Graph loaded.\n");
-  // }
+  if (rank == 0) {
+    g = init_from_file(argv[1]);
+    mst = init_adj_graph(g->V, g->V - 1);
+    printf("Graph loaded.\n");
+    Bcast_adj_graph(g, MPI_COMM_WORLD);
+  } else {
+    Bcast_adj_graph(g, MPI_COMM_WORLD);
+  }
+
+  if (rank == 2) {
+    printf("Rank 2\n");
+    printf("V: %d\n", g->V);
+  }
 
   double start_time;
 

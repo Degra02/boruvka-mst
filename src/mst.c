@@ -47,6 +47,7 @@ void adj_boruvka(AG *g, AG *mst) {
   Edge *closest_local = (Edge *)malloc(V * sizeof(Edge));
 
   for (int i = 1; i < V && mst_edges < V - 1; i *= 2) {
+    #pragma omp parallel for
     for (int j = 0; j < V; j++) {
       closest[j].w = INT_MAX;
     }
