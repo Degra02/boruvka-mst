@@ -2,6 +2,7 @@
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <omp.h>
 
 #include "../include/mfset.h"
 #include "../include/mst.h"
@@ -32,7 +33,7 @@ void adj_boruvka(AG *g, AG *mst) {
   MPI_Scatter(g->edges, edges_per_proc * 3, MPI_INT, local_edges,
               edges_per_proc * 3, MPI_INT, 0, MPI_COMM_WORLD);
 
-  if (rank == size - 1 && E % size != 0) {
+  if (rank == size - 1 && E % edges_per_proc != 0) {
     edges_per_proc = E % edges_per_proc;
   }
 
@@ -51,6 +52,7 @@ void adj_boruvka(AG *g, AG *mst) {
     }
 
     // search for the closest edge
+    // #pragma omp parallel for
     for (int j = 0; j < edges_per_proc; j++) {
       Edge e = local_edges[j];
 
@@ -60,13 +62,16 @@ void adj_boruvka(AG *g, AG *mst) {
       if (root_src == root_dest) {
         continue;
       }
+      
+      // #pragma omp critical
+      {
+        if (closest[root_src].w == INT_MAX || e.w < closest[root_src].w) {
+          closest[root_src] = clone_edge(&e);
+        }
 
-      if (closest[root_src].w == INT_MAX || e.w < closest[root_src].w) {
-        closest[root_src] = clone_edge(&e);
-      }
-
-      if (closest[root_dest].w == INT_MAX || e.w < closest[root_dest].w) {
-        closest[root_dest] = clone_edge(&e);
+        if (closest[root_dest].w == INT_MAX || e.w < closest[root_dest].w) {
+          closest[root_dest] = clone_edge(&e);
+        }
       }
     }
 
@@ -92,14 +97,20 @@ void adj_boruvka(AG *g, AG *mst) {
 
     MPI_Bcast(closest, V * 3, MPI_INT, 0, MPI_COMM_WORLD);
 
+    // #pragma omp parallel for
     for (int j = 0; j < V; j++) {
       if (closest[j].w != INT_MAX) {
         int root_src = find(mfset, closest[j].src);
         int root_dest = find(mfset, closest[j].dest);
 
         if (root_src != root_dest) {
-          unite(mfset, root_src, root_dest);
-          mst->edges[mst_edges++] = clone_edge(&closest[j]);
+          // #pragma omp critical
+          {
+            // if (rank == 0) {
+              mst->edges[mst_edges++] = clone_edge(&closest[j]);
+            // }
+            unite(mfset, root_src, root_dest);
+          }
         }
       }
     }

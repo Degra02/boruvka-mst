@@ -1,5 +1,5 @@
 CC = mpicc
-CFLAGS = -Wall -Wextra
+CFLAGS = -Wall -Wextra -fopenmp
 
 SRC_DIR = src
 INC_DIR = include
@@ -34,7 +34,7 @@ $(TARGET): $(OBJS)
 	$(CC) -o $@ $^ $(CFLAGS) -I$(IGRAPH_INC_DIR) -L$(IGRAPH_LIB_DIR) $(LIBS) $(MPI_LIBS)
 
 %.o: %.c
-	$(CC) -c $< -o $@ -DGEN=$(GEN) -DSAVE=$(SAVE)
+	$(CC) -c $< -o $@ -DGEN=$(GEN) -DSAVE=$(SAVE) $(CFLAGS)
 
 run: clean $(TARGET)
 	mpirun -np $(NP) ./$(TARGET) $(INPUT) $(OUTPUT)
