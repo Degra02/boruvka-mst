@@ -25,6 +25,7 @@ INPUT = "graph.txt"
 OUTPUT = "mst.txt"
 
 GEN ?= 0
+SAVE ?= 0
 
 all: $(TARGET)
 
@@ -33,7 +34,7 @@ $(TARGET): $(OBJS)
 	$(CC) -o $@ $^ $(CFLAGS) -I$(IGRAPH_INC_DIR) -L$(IGRAPH_LIB_DIR) $(LIBS) $(MPI_LIBS)
 
 %.o: %.c
-	$(CC) -c $< -o $@ -DGEN=$(GEN)
+	$(CC) -c $< -o $@ -DGEN=$(GEN) -DSAVE=$(SAVE)
 
 run: clean $(TARGET)
 	mpirun -np $(NP) ./$(TARGET) $(INPUT) $(OUTPUT)

@@ -21,7 +21,7 @@ void generate_complete_graph(const int V, const char *filename) {
 
 
   // print graph to file
-  fprintf(file, "%d %d\n", V, V*V - V);
+  fprintf(file, "%d %d\n", V, V * (V - 1) / 2);
 
   igraph_integer_t from, to;
   igraph_vector_int_t edges;

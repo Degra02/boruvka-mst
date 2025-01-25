@@ -9,9 +9,9 @@
   #define GEN 0
 #endif
 
-// #ifndef V_GEN
-//   #define V_GEN 1000
-// #endif
+#ifndef SAVE
+  #define SAVE 0
+#endif
 
 int main(int argc, char *argv[]) {
   if (argc != 3) {
@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
   if (rank == 0) {
     printf("Time: %f\n", end_time - start_time);
 
-    print_file_adj_graph(mst, argv[2]);
+    if (SAVE) print_file_adj_graph(mst, argv[2]);
 
     free_adj_graph(g);
     free_adj_graph(mst);
