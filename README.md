@@ -28,3 +28,12 @@ When running with `make`, the number of processes can be set using the `NP` vari
 make run NP=<procs>
 ```
 Here, also the `GEN`, `INPUT`, and `OUTPUT` variables can be set, since the `run` target triggers a `clean` before being executed.
+
+
+# Debug
+To compile the code with debugging prints, use the `debug` target:
+```bash
+make debug
+```
+All the other options can be used with the `debug` target as well.
+
