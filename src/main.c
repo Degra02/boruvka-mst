@@ -36,17 +36,17 @@ int main(int argc, char *argv[]) {
 
   // FIX: Load graph only in rank 0
   // Currently the program crashes if the graph is not loaded in all ranks
-  if (rank == 0) {
+  // if (rank == 0) {
     g = init_from_file(argv[1]);
     mst = init_adj_graph(g->V, g->V - 1);
     printf("Graph loaded.\n");
-    Bcast_adj_graph(g, MPI_COMM_WORLD);
-  } else {
-    Bcast_adj_graph(g, MPI_COMM_WORLD);
-  }
+    // Bcast_adj_graph(g, MPI_COMM_WORLD);
+  // } else {
+  //   Bcast_adj_graph(g, MPI_COMM_WORLD);
+  // }
 
-  if (rank == 2) {
-    printf("Rank 2\n");
+  if (rank == 1) {
+    printf("Rank 1\n");
     printf("V: %d\n", g->V);
   }
 

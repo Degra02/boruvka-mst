@@ -62,11 +62,14 @@ void print_file_adj_graph(AG *g, const char *filename) {
     exit(1);
   }
 
+  int sum = 0;
   fprintf(file, "%d %d\n", g->V, g->E);
   for (int i = 0; i < g->E; i++) {
-    fprintf(file, "%d %d %d\n", g->edges[i].src, g->edges[i].dest,
+    sum += g->edges[i].w;
+    fprintf(file, "%d - %d | %d\n", g->edges[i].src, g->edges[i].dest,
             g->edges[i].w);
   }
+  fprintf(file, "Total weight: %d\n", sum);
 
   fclose(file);
 }
