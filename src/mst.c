@@ -19,15 +19,6 @@ void adj_boruvka(AG *g, AG *mst) {
   V = g->V;
   E = g->E;
 
-  if (DEBUG && rank != 0) {
-    printf("Rank %d: V = %d, E = %d\n", rank, V, E);
-    for (int i = 0; i < E; i++) {
-      printf("%d - %d | %d\n", g->edges[i].src, g->edges[i].dest,
-             g->edges[i].w);
-    }
-  }
-
-
   //
   // // broadcast V and E
   // if (rank == 0) {
@@ -49,6 +40,8 @@ void adj_boruvka(AG *g, AG *mst) {
   if (rank == size - 1 && E % edges_per_proc != 0) {
     edges_per_proc = E % edges_per_proc;
   }
+
+  print_debug("edges_per_proc = %d", ANSI_COLOR_CYAN, rank, edges_per_proc);
 
   // TODO: check if the size is compatible with the number of processes
 

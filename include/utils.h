@@ -8,6 +8,25 @@
   #define DEBUG 0
 #endif
 
+#define ANSI_COLOR_RED     "\x1b[31m"
+#define ANSI_COLOR_GREEN   "\x1b[32m"
+#define ANSI_COLOR_YELLOW  "\x1b[33m"
+#define ANSI_COLOR_BLUE    "\x1b[34m"
+#define ANSI_COLOR_MAGENTA "\x1b[35m"
+#define ANSI_COLOR_CYAN    "\x1b[36m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
+
+
+/*
+ * Print a debug message.
+ * @param msg Message to print.
+ * @param color Color of the message.
+ * @param rank Rank of the process.
+ * @params ... Additional parameters to format the message.
+*/
+// void print_debug(const char *, const char *, const int);
+void print_debug(const char *format, const char *color, const int rank, ...);
+
 /*
 * Generate a complete graph with V vertices.
 * @param V Number of vertices.

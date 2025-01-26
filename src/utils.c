@@ -3,8 +3,33 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <igraph/igraph.h>
+#include <stdarg.h>
 
 #define MAX_WEIGHT 200
+
+void print_debug(const char *format, const char *color, const int rank, ...) {
+    if (DEBUG) {
+        va_list args;
+        va_start(args, rank);
+        
+        // Print the debug message with the rank and color
+        printf("[DEBUG] %d: %s", rank, color);
+        
+        // Print the formatted message
+        vprintf(format, args);
+        
+        // Reset color at the end
+        printf("%s\n", ANSI_COLOR_RESET);
+        
+        va_end(args);
+    }
+}
+
+// void print_debug(const char *msg, const char *color, const int rank) {
+//   if (DEBUG) {
+//     printf("[DEBUG] %d: %s%s%s\n", rank, color, msg, ANSI_COLOR_RESET);
+//   }
+// }
 
 void generate_complete_graph(const int V, const char *filename) {
   FILE *file = fopen(filename, "w");
@@ -56,11 +81,9 @@ void Bcast_adj_graph(AG **g, MPI_Comm comm) {
   MPI_Ibcast(( *g )->edges, E * 3, MPI_INT, 0, comm, &request);
   MPI_Wait(&request, MPI_STATUS_IGNORE);
 
-  if (DEBUG) {
-    int rank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    printf("Rank %d\n", rank);
-    printf("V: %d\n", V);
-    printf("E: %d\n", E);
+  int rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  if (rank != 0) {
+    print_debug("Graph broadcasted.", ANSI_COLOR_GREEN, rank);
   }
 }

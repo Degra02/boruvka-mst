@@ -21,15 +21,22 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  if (GEN > 0) {
-    printf("Generating complete graph with %d vertices.\n", GEN);
-    generate_complete_graph(GEN, argv[1]);
-  } 
-
   int rank, size;
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+  int graph_generated = 0;
+  if (GEN > 0 && rank == 0) {
+    print_debug("Generating graph...", ANSI_COLOR_YELLOW, rank);
+    generate_complete_graph(GEN, argv[1]);
+    print_debug("Graph generated.", ANSI_COLOR_GREEN, rank);
+    graph_generated = 1;
+  } else if (GEN == 0) {
+    graph_generated = 1;
+  }
+
+  MPI_Bcast(&graph_generated, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
   AG *g = NULL;
   AG *mst = NULL;
@@ -37,13 +44,16 @@ int main(int argc, char *argv[]) {
   // FIX: Load graph only in rank 0
   // Currently the program crashes if the graph is not loaded in all ranks
   // if (rank == 0) {
+  if (graph_generated && rank == 0) {
     g = init_from_file(argv[1]);
     mst = init_adj_graph(g->V, g->V - 1);
-    printf("Graph loaded.\n");
-  //   Bcast_adj_graph(&g, MPI_COMM_WORLD);
+    print_debug("Graph loaded.", ANSI_COLOR_GREEN, rank);
+    Bcast_adj_graph(&g, MPI_COMM_WORLD);
   // } else {
-  //   Bcast_adj_graph(&g, MPI_COMM_WORLD);
-  // }
+  } else {
+    Bcast_adj_graph(&g, MPI_COMM_WORLD);
+    print_debug("Graph not loaded.", ANSI_COLOR_RED, rank);
+  }
 
   double start_time;
 
