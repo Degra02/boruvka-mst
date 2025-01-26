@@ -39,20 +39,28 @@ void generate_complete_graph(const int V, const char *filename) {
   igraph_destroy(&graph);
 }
 
-void Bcast_adj_graph(AG *g, MPI_Comm comm) {
+void Bcast_adj_graph(AG **g, MPI_Comm comm) {
   int V, E;
-  if (g != NULL) {
-    V = g->V;
-    E = g->E;
+  if (*g != NULL) {
+    V = (*g)->V;
+    E = (*g)->E;
   }
   MPI_Bcast(&V, 1, MPI_INT, 0, comm);
   MPI_Bcast(&E, 1, MPI_INT, 0, comm);
   
-  if (g == NULL) {
-    g = init_adj_graph(V, E);
+  if (*g == NULL) {
+    *g = init_adj_graph(V, E);
   }
 
   MPI_Request request;
-  MPI_Ibcast(g->edges, E * 3, MPI_INT, 0, comm, &request);
+  MPI_Ibcast(( *g )->edges, E * 3, MPI_INT, 0, comm, &request);
   MPI_Wait(&request, MPI_STATUS_IGNORE);
+
+  if (DEBUG) {
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    printf("Rank %d\n", rank);
+    printf("V: %d\n", V);
+    printf("E: %d\n", E);
+  }
 }

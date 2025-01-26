@@ -4,6 +4,10 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#ifndef DEBUG
+  #define DEBUG 0
+#endif
+
 /*
 * Generate a complete graph with V vertices.
 * @param V Number of vertices.
@@ -15,7 +19,7 @@ void generate_complete_graph(const int, const char *);
 * Broadcasts an adjacency graph.
 * @param g Pointer to the adjacency graph.
 */
-void Bcast_adj_graph(AG *, MPI_Comm);
+void Bcast_adj_graph(AG **, MPI_Comm);
 
 #endif // !UTILS_H
 #define UTILS_H

@@ -6,6 +6,7 @@
 
 #include "../include/mfset.h"
 #include "../include/mst.h"
+#include "../include/utils.h"
 
 void adj_boruvka(AG *g, AG *mst) {
   int rank;
@@ -15,17 +16,29 @@ void adj_boruvka(AG *g, AG *mst) {
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
   int V, E;
+  V = g->V;
+  E = g->E;
 
-  // broadcast V and E
-  if (rank == 0) {
-    V = g->V;
-    E = g->E;
-    MPI_Bcast(&V, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Bcast(&E, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  } else {
-    MPI_Bcast(&V, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Bcast(&E, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  if (DEBUG && rank != 0) {
+    printf("Rank %d: V = %d, E = %d\n", rank, V, E);
+    for (int i = 0; i < E; i++) {
+      printf("%d - %d | %d\n", g->edges[i].src, g->edges[i].dest,
+             g->edges[i].w);
+    }
   }
+
+
+  //
+  // // broadcast V and E
+  // if (rank == 0) {
+  //   V = g->V;
+  //   E = g->E;
+  //   MPI_Bcast(&V, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  //   MPI_Bcast(&E, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  // } else {
+  //   MPI_Bcast(&V, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  //   MPI_Bcast(&E, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  // }
 
   // split edges among processes
   int edges_per_proc = (E + size - 1) / size;
