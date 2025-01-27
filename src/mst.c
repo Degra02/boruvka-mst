@@ -1,8 +1,8 @@
 #include <limits.h>
 #include <mpi.h>
+#include <omp.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <omp.h>
 
 #include "../include/mfset.h"
 #include "../include/mst.h"
@@ -69,7 +69,7 @@ void adj_boruvka(AG *g, AG *mst) {
       if (root_src == root_dest) {
         continue;
       }
-      
+
       // #pragma omp critical
       {
         if (closest[root_src].w == INT_MAX || e.w < closest[root_src].w) {
@@ -114,7 +114,7 @@ void adj_boruvka(AG *g, AG *mst) {
           // #pragma omp critical
           {
             // if (rank == 0) {
-              mst->edges[mst_edges++] = clone_edge(&closest[j]);
+            mst->edges[mst_edges++] = clone_edge(&closest[j]);
             // }
             unite(mfset, root_src, root_dest);
           }
