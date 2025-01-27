@@ -1,28 +1,35 @@
 #include "../include/utils.h"
+#include <igraph/igraph.h>
 #include <mpi.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <igraph/igraph.h>
-#include <stdarg.h>
 
 #define MAX_WEIGHT 200
 
-void print_debug(const char *format, const char *color, const int rank, ...) {
-    if (DEBUG) {
-        va_list args;
-        va_start(args, rank);
-        
-        // Print the debug message with the rank and color
-        printf("[DEBUG] %d: %s", rank, color);
-        
-        // Print the formatted message
-        vprintf(format, args);
-        
-        // Reset color at the end
-        printf("%s\n", ANSI_COLOR_RESET);
-        
-        va_end(args);
-    }
+extern double program_start_time;
+
+void print_debug(const char *format, const char *color,
+                 const int rank, ...) {
+  if (DEBUG) {
+    va_list args;
+    va_start(args, rank);
+
+    double current_time = MPI_Wtime();
+    double time_elapsed = current_time - program_start_time;
+
+
+    // Print the debug message with the rank and color
+    printf("[%f] %d: %s", time_elapsed, rank, color);
+
+    // Print the formatted message
+    vprintf(format, args);
+
+    // Reset color at the end
+    printf("%s\n", ANSI_COLOR_RESET);
+
+    va_end(args);
+  }
 }
 
 // void print_debug(const char *msg, const char *color, const int rank) {
@@ -42,7 +49,6 @@ void generate_complete_graph(const int V, const char *filename) {
   igraph_t graph;
   igraph_integer_t V_igraph = V;
   igraph_full(&graph, V_igraph, IGRAPH_UNDIRECTED, IGRAPH_NO_LOOPS);
-
 
   // print graph to file
   fprintf(file, "%d %d\n", V, V * (V - 1) / 2);
@@ -72,7 +78,7 @@ void Bcast_adj_graph(AG **g, MPI_Comm comm) {
   }
   MPI_Bcast(&V, 1, MPI_INT, 0, comm);
   MPI_Bcast(&E, 1, MPI_INT, 0, comm);
-  
+
   if (*g == NULL) {
     *g = init_adj_graph(V, E);
   }
@@ -80,12 +86,13 @@ void Bcast_adj_graph(AG **g, MPI_Comm comm) {
   // MPI_Request request;
   // MPI_Ibcast(( *g )->edges, E * 3, MPI_INT, 0, comm, &request);
   // MPI_Wait(&request, MPI_STATUS_IGNORE);
-  MPI_Bcast(( *g )->edges, E * 3, MPI_INT, 0, comm);
+  MPI_Bcast((*g)->edges, E * 3, MPI_INT, 0, comm);
 
   int rank;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   if (rank != 0) {
-    print_debug("Graph broadcasted. V = %d, E = %d", ANSI_COLOR_GREEN, rank, V, E);
+    print_debug("Graph broadcasted. V = %d, E = %d", ANSI_COLOR_GREEN, rank, V,
+                E);
     print_debug("V = %d, E = %d", ANSI_COLOR_CYAN, rank, V, E);
   }
 }

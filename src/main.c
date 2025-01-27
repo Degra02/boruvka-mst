@@ -14,6 +14,8 @@
   #define SAVE 0
 #endif
 
+double program_start_time;
+
 int main(int argc, char *argv[]) {
   srand(time(NULL));
   if (argc != 3) {
@@ -21,10 +23,13 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
+
   int rank, size;
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+  program_start_time = MPI_Wtime();
 
   int graph_generated = 0;
   if (GEN > 0 && rank == 0) {
