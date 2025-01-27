@@ -77,13 +77,15 @@ void Bcast_adj_graph(AG **g, MPI_Comm comm) {
     *g = init_adj_graph(V, E);
   }
 
-  MPI_Request request;
-  MPI_Ibcast(( *g )->edges, E * 3, MPI_INT, 0, comm, &request);
-  MPI_Wait(&request, MPI_STATUS_IGNORE);
+  // MPI_Request request;
+  // MPI_Ibcast(( *g )->edges, E * 3, MPI_INT, 0, comm, &request);
+  // MPI_Wait(&request, MPI_STATUS_IGNORE);
+  MPI_Bcast(( *g )->edges, E * 3, MPI_INT, 0, comm);
 
   int rank;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   if (rank != 0) {
-    print_debug("Graph broadcasted.", ANSI_COLOR_GREEN, rank);
+    print_debug("Graph broadcasted. V = %d, E = %d", ANSI_COLOR_GREEN, rank, V, E);
+    print_debug("V = %d, E = %d", ANSI_COLOR_CYAN, rank, V, E);
   }
 }
