@@ -41,10 +41,6 @@ int main(int argc, char *argv[]) {
   AG *g = NULL;
   AG *mst = NULL;
 
-  // FIX: Load graph only in rank 0
-  // Currently the program crashes if the graph is not loaded in all ranks
-  // if (rank == 0) {
-  // int graph_bcasted = 0;
   if (graph_generated && rank == 0) {
     g = init_from_file(argv[1]);
     print_debug("Graph loaded.", ANSI_COLOR_GREEN, rank);
