@@ -27,7 +27,6 @@ void adj_boruvka(AG *g, AG *mst) {
   if (rank == size - 1 && E % edges_per_proc != 0) {
     edges_per_proc = E % edges_per_proc;
   }
-
   print_debug("edges_per_proc = %d", ANSI_COLOR_CYAN, rank, edges_per_proc);
 
   // TODO: check if the size is compatible with the number of processes
@@ -40,13 +39,13 @@ void adj_boruvka(AG *g, AG *mst) {
   Edge *closest_local = (Edge *)malloc(V * sizeof(Edge));
 
   for (int i = 1; i < V && mst_edges < V - 1; i *= 2) {
-#pragma omp parallel for
+    #pragma omp parallel for
     for (int j = 0; j < V; j++) {
       closest[j].w = INT_MAX;
     }
 
-// search for the closest edge
-#pragma omp parallel for
+    // search for the closest edge
+    // #pragma omp parallel for
     for (int j = 0; j < edges_per_proc; j++) {
       Edge e = local_edges[j];
 
@@ -62,12 +61,12 @@ void adj_boruvka(AG *g, AG *mst) {
       // int update_dest = (closest[root_dest].w == INT_MAX || e.w < closest[root_dest].w);
 
       if (e.w < closest[root_src].w) {
-#pragma opm atomic write
+        // #pragma omp atomic write
         closest[root_src] = clone_edge(&e);
       }
 
       if (e.w < closest[root_dest].w) {
-#pragma opm atomic write
+        // #pragma omp atomic write
         closest[root_dest] = clone_edge(&e);
       }
     }
@@ -80,25 +79,29 @@ void adj_boruvka(AG *g, AG *mst) {
           MPI_Recv(closest_local, V * 3, MPI_INT, from, 0, MPI_COMM_WORLD,
                    MPI_STATUS_IGNORE);
 
-          // int min_weight = INT_MAX;
-          // int min_index = -1;
-          // #pragma omp parallel for reduction(min : min_weight)
-          for (int j = 0; j < V; j++) {
-            if (closest_local[j].w < closest[j].w) {
-              // #pragma omp critical
-              // {
-              //     if (closest_local[j].w < min_weight) {
-              //         min_weight = closest_local[j].w;
-              //         min_index = j;
-              //     }
-              // }
-              closest[j] = clone_edge(&closest_local[j]);
-            }
-          }
 
-          // if (min_index != -1) {
-          //   closest[min_index] = clone_edge(&closest_local[min_index]);
-          // }
+          #if OMP == 0
+            for (int j = 0; j < V; j++) {
+              if (closest_local[j].w < closest[j].w) {
+                closest[j] = clone_edge(&closest_local[j]);
+              }
+            }
+          #else
+            if (rank == 0) print_debug("OMP", ANSI_COLOR_YELLOW, rank);
+            int chunk_size = V / omp_get_num_threads();  
+            #pragma omp parallel 
+            {
+              int tid = omp_get_thread_num();
+              int start = tid * chunk_size;
+              int end = (tid == omp_get_max_threads() - 1) ? V : start + chunk_size;
+
+              for (int j = start; j < end; j++) {
+                if (closest_local[j].w < closest[j].w) {
+                  closest[j] = clone_edge(&closest_local[j]);
+                }
+              }
+            }
+          #endif
         }
       } else if (rank % st == 0) {
         to = rank - st;

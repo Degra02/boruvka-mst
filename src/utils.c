@@ -17,13 +17,9 @@ void print_debug(const char *format, const char *color, const int rank, ...) {
     double current_time = MPI_Wtime();
     double time_elapsed = current_time - program_start_time;
 
-    // Print the debug message with the rank and color
-    printf("[%f] %d: %s", time_elapsed, rank, color);
-
-    // Print the formatted message
+    printf("%s[%f]%s ", ANSI_COLOR_GREY, time_elapsed, ANSI_COLOR_RESET);
+    printf("%d: %s", rank, color);
     vprintf(format, args);
-
-    // Reset color at the end
     printf("%s\n", ANSI_COLOR_RESET);
 
     va_end(args);

@@ -14,6 +14,10 @@
 #define SAVE 0
 #endif
 
+#ifndef OMP
+#define OMP 0
+#endif
+
 double program_start_time;
 
 int main(int argc, char *argv[]) {
