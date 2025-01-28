@@ -1,17 +1,17 @@
-#include <mpi.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include "../include/graph.h"
 #include "../include/mst.h"
 #include "../include/utils.h"
+#include <mpi.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 
 #ifndef GEN
-  #define GEN 0
+#define GEN 0
 #endif
 
 #ifndef SAVE
-  #define SAVE 0
+#define SAVE 0
 #endif
 
 double program_start_time;
@@ -22,7 +22,6 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "Usage: %s <graph-file> <output-file>\n", argv[0]);
     exit(1);
   }
-
 
   int rank, size;
   MPI_Init(&argc, &argv);
@@ -63,12 +62,13 @@ int main(int argc, char *argv[]) {
 
   start_time = MPI_Wtime();
   adj_boruvka(g, mst);
-  
+
   if (rank == 0) {
     double end_time = MPI_Wtime();
     printf("Time: %f\n", end_time - start_time);
 
-    if (SAVE) print_file_adj_graph(mst, argv[2]);
+    if (SAVE)
+      print_file_adj_graph(mst, argv[2]);
 
     free_adj_graph(g);
     free_adj_graph(mst);

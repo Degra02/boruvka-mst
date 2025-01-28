@@ -29,6 +29,13 @@
 void print_debug(const char *, const char *, const int, ...);
 
 /*
+ * Get a random number.
+ * @return Random number.
+ * @note This function has to be tested to check if it provides a "more random" number than rand().
+ */
+unsigned int get_random();
+
+/*
  * Generate a complete graph with V vertices.
  * @param V Number of vertices.
  * @param filename Name of the file to save the graph.

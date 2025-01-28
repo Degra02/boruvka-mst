@@ -9,15 +9,13 @@
 
 extern double program_start_time;
 
-void print_debug(const char *format, const char *color,
-                 const int rank, ...) {
+void print_debug(const char *format, const char *color, const int rank, ...) {
   if (DEBUG) {
     va_list args;
     va_start(args, rank);
 
     double current_time = MPI_Wtime();
     double time_elapsed = current_time - program_start_time;
-
 
     // Print the debug message with the rank and color
     printf("[%f] %d: %s", time_elapsed, rank, color);
@@ -32,11 +30,18 @@ void print_debug(const char *format, const char *color,
   }
 }
 
-// void print_debug(const char *msg, const char *color, const int rank) {
-//   if (DEBUG) {
-//     printf("[DEBUG] %d: %s%s%s\n", rank, color, msg, ANSI_COLOR_RESET);
-//   }
-// }
+
+unsigned int get_random() {
+    unsigned int random_value;
+    __asm__ __volatile__ (
+        "rdrand %0"
+        : "=r"(random_value)
+        : 
+        : "cc"
+    );
+    return random_value;
+}
+
 
 void generate_complete_graph(const int V, const char *filename) {
   FILE *file = fopen(filename, "w");
@@ -53,15 +58,17 @@ void generate_complete_graph(const int V, const char *filename) {
   // print graph to file
   fprintf(file, "%d %d\n", V, V * (V - 1) / 2);
 
+
   igraph_integer_t from, to;
   igraph_vector_int_t edges;
   igraph_integer_t E = igraph_ecount(&graph);
   igraph_vector_int_init(&edges, E);
   igraph_get_edgelist(&graph, &edges, 0);
   for (int i = 0; i < E; i++) {
+    unsigned int random_value = get_random();
     from = VECTOR(edges)[2 * i];
     to = VECTOR(edges)[2 * i + 1];
-    fprintf(file, "%d %d %d\n", (int)from, (int)to, rand() % MAX_WEIGHT + 1);
+    fprintf(file, "%d %d %d\n", (int)from, (int)to, random_value % MAX_WEIGHT + 1);
   }
   igraph_vector_int_destroy(&edges);
 
