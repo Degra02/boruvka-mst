@@ -10,7 +10,6 @@ This project implements a parallel version of Boruvka's algorithm using MPI and 
 ## Prerequisites
 - MPI library.
 - OpenMP support in your compiler
-- igraph library for graph operations (Will be deprecated)
 
 ## Compilation
 
@@ -26,9 +25,9 @@ You can customize the compilation process by passing the following options to `m
 - `GEN=<num>`: Generate a random graph with `<num>` vertices and edges. Default is `0`, which means a preexisting `graph.txt` file will be used.
 - `MAX=<num>`: Set the maximum weight for random edge generation. Default is `200`.
 - `MIN=<num>`: Set the minimum weight for random edge generation. Default is `1`.
-- `INPUT=/path/to/file`: Specify a custom input file. Default is `graph.txt`.
-- `OUTPUT=/path/to/file`: Specify a custom output file. Default is `mst.txt`.
-- `SAVE=1`: Save the resulting *mst* to a file named `mst.txt`. Default is `0`.
+- `INPUT=/path/to/file`: Specify a custom input file. Default is `graph.txt`. If `GEN` and `SAVE` are set, this file will be used to save the generated graph.
+- `OUTPUT=/path/to/file`: Specify a custom output file. Default is `mst.txt`. This file will contain the resulting MST. The option `SAVE` must be set to `1` to save the MST.
+- `SAVE=1`: Save the generated *graph* to `INPUT` and the resulting *mst* to `OUTPUT`. Default is `0`.
 - `NP=<num>`: Set the number of processes for MPI execution. Default is `1`.
 - `DEBUG=1`: Compile with debugging prints enabled.
 
@@ -38,7 +37,7 @@ After compiling, you can run the program through the `make` command:
 
 ### Using `make`
 ```bash
-make run NP=<procs> INPUT=/path/to/input OUTPUT=/path/to/output
+make run NP=<procs> GEN=<num> MIN=<num> MAX=<num> INPUT=/path/to/file OUTPUT=/path/to/file SAVE=1
 ```
 
 The `run` target will automatically clean previous builds before executing the program.
@@ -89,6 +88,10 @@ make clean
 3. **Compile with debugging enabled, with other options:**
    ```bash
    make debug NP=2 GEN=5000 MAX=1000
+
+4. **Compile with debugging enabled, generate a random graph, and save the generated graph and MST to custom locations:**
+    ```bash
+    make debug NP=4 GEN=1000 MIN=10 MAX=100 SAVE=1 INPUT=/path/to/custom_graph.txt OUTPUT=/path/to/output_mst.txt
    ```
 
 ## License

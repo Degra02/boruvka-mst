@@ -4,12 +4,9 @@ CFLAGS = -Wall -Wextra -fopenmp
 SRC_DIR = src
 INC_DIR = include
 
-# igraph
-IGRAPH_LIB_DIR = /usr/local/lib
-IGRAPH_INC_DIR = /usr/local/include/igraph
 
 MPI_LIBS = $(shell mpicc --showme:link)
-LIBS = -ligraph -larpack -lm
+LIBS = -lm
 
 # source files
 SRCS = $(wildcard $(SRC_DIR)/*.c)
@@ -36,7 +33,7 @@ all: $(TARGET)
 
 
 $(TARGET): $(OBJS)
-	$(CC) -o $@ $^ $(CFLAGS) -I$(IGRAPH_INC_DIR) -L$(IGRAPH_LIB_DIR) $(LIBS) $(MPI_LIBS)
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) $(MPI_LIBS)
 
 %.o: %.c
 	$(CC) -c $< -o $@ -DGEN=$(GEN) -DMAX=$(MAX) -DMIN=$(MIN) -DSAVE=$(SAVE) -DDEBUG=$(DEBUG) -DOMP=$(OMP) $(CFLAGS)
