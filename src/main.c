@@ -33,12 +33,16 @@ int main(int argc, char *argv[]) {
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
   program_start_time = MPI_Wtime();
+  AG *g = NULL;
+  AG *mst = NULL;
 
+
+  // TODO: add choice between generating graph.txt file and loading it 
+  // or just generating the graph without saving it to a file
   int graph_generated = 0;
   if (GEN > 0 && rank == 0) {
-    print_debug("Generating graph...", ANSI_COLOR_YELLOW, rank);
-    generate_complete_graph(GEN, argv[1]);
-    print_debug("Graph generated.", ANSI_COLOR_GREEN, rank);
+    // generate_complete_graph(GEN, argv[1]);
+    g = generate_graph(GEN);
     graph_generated = 1;
   } else if (GEN == 0) {
     graph_generated = 1;
@@ -46,17 +50,16 @@ int main(int argc, char *argv[]) {
 
   MPI_Bcast(&graph_generated, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-  AG *g = NULL;
-  AG *mst = NULL;
 
   if (graph_generated && rank == 0) {
-    g = init_from_file(argv[1]);
-    print_debug("Graph loaded.", ANSI_COLOR_GREEN, rank);
+    // g = init_from_file(argv[1]);
+    // print_debug("Graph loaded.", ANSI_COLOR_GREEN, rank);
     Bcast_adj_graph(&g, MPI_COMM_WORLD);
   } else {
     Bcast_adj_graph(&g, MPI_COMM_WORLD);
   }
 
+  print_debug("V = %d, E = %d", ANSI_COLOR_CYAN, rank, g->V, g->E);
   mst = init_adj_graph(g->V, g->V - 1);
   // not needed but just to be sure
   MPI_Barrier(MPI_COMM_WORLD);

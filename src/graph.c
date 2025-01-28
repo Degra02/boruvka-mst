@@ -14,7 +14,7 @@ AG *init_adj_graph(const int V, const int E) {
 
   g->edges = (Edge *)malloc(E * sizeof(Edge));
   if (g->edges == NULL) {
-    fprintf(stderr, "Error: unable to allocate memory for graph\n");
+    fprintf(stderr, "Error: unable to allocate memory for graph's edges\n");
     exit(1);
   }
 

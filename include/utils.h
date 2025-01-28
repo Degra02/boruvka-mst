@@ -44,6 +44,13 @@ unsigned int get_random();
 void generate_complete_graph(const int, const char *);
 
 /*
+ * Generate a complete graph with V vertices, without saving it to a file.
+ * @param V Number of vertices.
+ * @param g Pointer to the adjacency graph.
+ */
+AG* generate_graph(const int);
+
+/*
  * Broadcasts an adjacency graph.
  * @param g Pointer to the adjacency graph.
  */
