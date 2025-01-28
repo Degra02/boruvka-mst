@@ -37,13 +37,6 @@ void print_debug(const char *, const char *, const int, ...);
 unsigned int get_random();
 
 /*
- * Generate a complete graph with V vertices.
- * @param V Number of vertices.
- * @param filename Name of the file to save the graph.
- */
-void generate_complete_graph(const int, const char *);
-
-/*
  * Generate a complete graph with V vertices, without saving it to a file.
  * @param V Number of vertices.
  * @param g Pointer to the adjacency graph.
@@ -55,6 +48,7 @@ AG* generate_graph(const int);
  * @param g Pointer to the adjacency graph.
  */
 void Bcast_adj_graph(AG **, MPI_Comm);
+
 
 #endif // !UTILS_H
 #define UTILS_H
