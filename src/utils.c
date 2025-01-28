@@ -5,7 +5,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX_WEIGHT 200
+#ifndef MAX
+#define MAX 200
+#endif
+
+#ifndef MIN
+#define MIN 1
+#endif
 
 extern double program_start_time;
 
@@ -73,7 +79,7 @@ void generate_complete_graph(const int V, const char *filename) {
     fread(&random_value, sizeof(unsigned int), 1, random);
     from = VECTOR(edges)[2 * i];
     to = VECTOR(edges)[2 * i + 1];
-    fprintf(file, "%d %d %d\n", (int)from, (int)to, random_value % MAX_WEIGHT + 1);
+    fprintf(file, "%d %d %d\n", (int)from, (int)to, (random_value % MAX) + MIN);
   }
   igraph_vector_int_destroy(&edges);
 

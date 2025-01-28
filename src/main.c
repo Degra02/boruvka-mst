@@ -60,23 +60,21 @@ int main(int argc, char *argv[]) {
   mst = init_adj_graph(g->V, g->V - 1);
   // not needed but just to be sure
   MPI_Barrier(MPI_COMM_WORLD);
-  print_debug("Process reached barrier", ANSI_COLOR_YELLOW, rank);
+  // print_debug("Process reached barrier", ANSI_COLOR_YELLOW, rank);
 
   double start_time;
-
+  print_debug("Starting Boruvka...", ANSI_COLOR_MAGENTA, rank);
   start_time = MPI_Wtime();
   adj_boruvka(g, mst);
 
   if (rank == 0) {
     double end_time = MPI_Wtime();
-    printf("Time: %f\n", end_time - start_time);
+    printf("[END] %s MST Time: %f %s\n", ANSI_COLOR_BLUE, end_time - start_time, ANSI_COLOR_RESET);
 
-    if (SAVE)
-      print_file_adj_graph(mst, argv[2]);
-
-    free_adj_graph(g);
-    free_adj_graph(mst);
+    if (SAVE) print_file_adj_graph(mst, argv[2]);
   }
+  free_adj_graph(g);
+  free_adj_graph(mst);
 
   MPI_Finalize();
   return 0;
