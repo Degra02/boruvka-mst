@@ -1,14 +1,17 @@
+# specify compiler and compiler flags
 CC = mpicc
 CFLAGS = -Wall -Wextra
 
+# conditional inclusion of openmp flag if OMP is defined
 ifeq ($(OMP), 1)
     CFLAGS += -fopenmp
 endif
 
+# needed directories
 SRC_DIR = src
 INC_DIR = include
 
-
+# MPI
 MPI_LIBS = $(shell mpicc --showme:link)
 LIBS = -lm
 
@@ -17,14 +20,17 @@ SRCS = $(wildcard $(SRC_DIR)/*.c)
 # object files
 OBJS = $(SRCS:.c=.o)
 
+# target executable
 TARGET = mst
 
-# processors
+# n. processors
 NP = 1
 
+# input and output files, README contains more info
 INPUT = "graph.txt"
 OUTPUT = "mst.txt"
 
+# some defines
 GEN ?= 0
 SAVE ?= 0
 DEBUG ?= 0
@@ -32,8 +38,9 @@ DEBUG ?= 0
 MAX ?= 200
 MIN ?= 5
 
-all: $(TARGET)
 
+# rules
+all: $(TARGET)
 
 $(TARGET): $(OBJS)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) $(MPI_LIBS)

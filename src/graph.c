@@ -47,11 +47,6 @@ AG *init_from_file(const char *filename) {
   return g;
 }
 
-void clone_edge(Edge *from, Edge *to) {
-  to->src = from->src;
-  to->dest = from->dest;
-  to->w = from->w;
-}
 
 void print_file_adj_graph(AG *g, const char *filename) {
   FILE *file = fopen(filename, "w");

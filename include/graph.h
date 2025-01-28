@@ -30,8 +30,14 @@ typedef struct Edge {
  * Clones the edge `e`.
  * @param `to`: pointer to the destination edge
  * @param `from`: pointer to the source edge
+ *
+ * @note The `inline` keyword is used to suggest the compiler to replace the function call with the function code, although proper profiling should be done.
 */
-void clone_edge(Edge*, Edge*);
+static inline void clone_edge(Edge *from, Edge *to) {
+  to->src = from->src;
+  to->dest = from->dest;
+  to->w = from->w;
+}
 
 /*
  * Graph in adjacency list format.
