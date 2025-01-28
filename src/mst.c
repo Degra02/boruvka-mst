@@ -59,10 +59,6 @@ void adj_boruvka(AG *g, AG *mst) {
         continue;
       }
 
-      // NOTE: first comparison is not needed
-      // int update_src = (closest[root_src].w == INT_MAX || e.w < closest[root_src].w);
-      // int update_dest = (closest[root_dest].w == INT_MAX || e.w < closest[root_dest].w);
-
       if (e.w < closest[root_src].w) {
         #pragma omp critical
         clone_edge(&e, &closest[root_src]);
@@ -82,8 +78,10 @@ void adj_boruvka(AG *g, AG *mst) {
           MPI_Recv(closest_local, V * 3, MPI_INT, from, 0, MPI_COMM_WORLD,
                    MPI_STATUS_IGNORE);
 
+          #pragma omp parallel for
           for (int j = 0; j < V; j++) {
             if (closest_local[j].w < closest[j].w) {
+              #pragma omp critical
               clone_edge(&closest_local[j], &closest[j]);
             }
           }
@@ -96,21 +94,21 @@ void adj_boruvka(AG *g, AG *mst) {
 
     MPI_Bcast(closest, V * 3, MPI_INT, 0, MPI_COMM_WORLD);
 
+    // FIX: this parallelization needs checking
     // #pragma omp parallel for
     for (int j = 0; j < V; j++) {
       if (closest[j].w != INT_MAX) {
-        int root_src = find(mfset, closest[j].src);
-        int root_dest = find(mfset, closest[j].dest);
+        {
+          int root_src = find(mfset, closest[j].src);
+          int root_dest = find(mfset, closest[j].dest);
 
-        if (root_src != root_dest) {
-          // #pragma omp critical
-          {
-            // if (rank == 0) {
-            // mst->edges[mst_edges++] = clone_edge(&closest[j]);
-            clone_edge(&closest[j], &mst->edges[mst_edges]);
-            mst_edges++;
-            // }
-            unite(mfset, root_src, root_dest);
+          if (root_src != root_dest) {
+            // #pragma omp critical
+            {
+              clone_edge(&closest[j], &mst->edges[mst_edges]);
+              mst_edges++;
+              unite(mfset, root_src, root_dest);
+            }
           }
         }
       }

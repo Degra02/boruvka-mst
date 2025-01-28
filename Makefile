@@ -57,14 +57,6 @@ debug: clean $(TARGET)
 	mpirun -np $(NP) ./$(TARGET) $(INPUT) $(OUTPUT)
 
 
-# test: $(TARGET)
-# 	@for p in {1..8}; do \
-# 		echo "$$p processors..."; \
-# 		echo "Command: mpirun -np $$p ./$(TARGET) $(INPUT) $(OUTPUT)"; \
-# 		mpirun -np $$p ./$(TARGET) $(INPUT) $(OUTPUT); \
-# 		echo; \
-# 	done;
-
 clean:
 	rm -f $(OBJS) $(TARGET)
 

@@ -94,6 +94,9 @@ make clean
     make debug NP=4 GEN=1000 MIN=10 MAX=100 SAVE=1 INPUT=/path/to/custom_graph.txt OUTPUT=/path/to/output_mst.txt
    ```
 
+### Demo video
+![Demo](./demo.gif)
+
 ## License
 
 This project is licensed under the GPL-3.0 License. See the LICENSE file for more details.
