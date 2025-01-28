@@ -79,6 +79,15 @@ void print_file_adj_graph(AG*, const char*);
 
 
 /*
+ * Prints the mst result to the specified file.
+ * @param `mst`: pointer to the mst
+ * @param `filename`: path to the file
+*/
+void print_file_mst(AG*, const char*);
+
+
+
+/*
 * Graph in CSR (Compressed Sparse Row) format.
 * @attr `dest`: array of size `|E|` mapping each edge to its destination vertex
 * @attr `w`: array of size `|E|` mapping each edge to its weight

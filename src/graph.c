@@ -60,16 +60,33 @@ void print_file_adj_graph(AG *g, const char *filename) {
     exit(1);
   }
 
-  int sum = 0;
   fprintf(file, "%d %d\n", g->V, g->E);
   for (int i = 0; i < g->E; i++) {
-    sum += g->edges[i].w;
-    fprintf(file, "%5d - %5d | %5d\n", g->edges[i].src, g->edges[i].dest,
+    fprintf(file, "%d %d %d\n", g->edges[i].src, g->edges[i].dest,
             g->edges[i].w);
+  }
+
+  fclose(file);
+}
+
+void print_file_mst(AG *mst, const char* filename) {
+  FILE *file = fopen(filename, "w");
+  if (file == NULL) {
+    fprintf(stderr, "Error: unable to open file\n");
+    exit(1);
+  }
+
+  int sum = 0;
+  fprintf(file, "%d %d\n", mst->V, mst->E);
+  for (int i = 0; i < mst->E; i++) {
+    sum += mst->edges[i].w;
+    fprintf(file, "%5d - %5d | %5d\n", mst->edges[i].src, mst->edges[i].dest,
+            mst->edges[i].w);
   }
   fprintf(file, "Total weight: %d\n", sum);
 
   fclose(file);
+
 }
 
 CSRG *init_csr_graph(const int V, const int E) {

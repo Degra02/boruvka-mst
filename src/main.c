@@ -18,6 +18,14 @@
 #define OMP 0
 #endif
 
+#ifndef INPUT
+#define INPUT "graph.txt"
+#endif
+
+#ifndef OUTPUT
+#define OUTPUT "mst.txt"
+#endif
+
 double program_start_time;
 
 int main(int argc, char *argv[]) {
@@ -33,20 +41,43 @@ int main(int argc, char *argv[]) {
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
   program_start_time = MPI_Wtime();
+
   AG *g = NULL;
   AG *mst = NULL;
 
-
-  // TODO: add choice between generating graph.txt file and loading it 
-  // or just generating the graph without saving it to a file
   int graph_generated = 0;
-  if (GEN > 0 && rank == 0) {
-    // generate_complete_graph(GEN, argv[1]);
-    g = generate_graph(GEN);
-    graph_generated = 1;
-  } else if (GEN == 0) {
+
+  if (rank == 0) {
+    switch (GEN) {
+      case 0:
+        print_debug("Loading graph from %s ...", ANSI_COLOR_YELLOW, rank, INPUT);
+        g = init_from_file(INPUT);
+        print_debug("Graph loaded.", ANSI_COLOR_GREEN, rank);
+        graph_generated = 1;
+        break;
+
+      default:
+        g = generate_graph(GEN);
+        if (SAVE) { 
+          print_debug("Saving graph to %s ...", ANSI_COLOR_YELLOW, rank, INPUT);
+          print_file_adj_graph(g, INPUT); 
+          print_debug("Graph saved.", ANSI_COLOR_GREEN, rank);
+        }
+        graph_generated = 1;
+        break;
+    }
+  } else {
     graph_generated = 1;
   }
+
+
+  // if (GEN > 0 && rank == 0) {
+  //   // generate_complete_graph(GEN, argv[1]);
+  //   g = generate_graph(GEN);
+  //   graph_generated = 1;
+  // } else if (GEN == 0) {
+  //   graph_generated = 1;
+  // }
 
   MPI_Bcast(&graph_generated, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
@@ -74,8 +105,10 @@ int main(int argc, char *argv[]) {
     double end_time = MPI_Wtime();
     printf("[END] %s MST Time: %f %s\n", ANSI_COLOR_BLUE, end_time - start_time, ANSI_COLOR_RESET);
 
-    if (SAVE) print_file_adj_graph(mst, argv[2]);
+    if (SAVE) print_file_mst(mst, OUTPUT);
   }
+
+  // clean up
   free_adj_graph(g);
   free_adj_graph(mst);
 
