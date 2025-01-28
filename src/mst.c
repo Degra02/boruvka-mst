@@ -62,12 +62,12 @@ void adj_boruvka(AG *g, AG *mst) {
 
       if (e.w < closest[root_src].w) {
         // #pragma omp atomic write
-        closest[root_src] = clone_edge(&e);
+        clone_edge(&e, &closest[root_src]);
       }
 
       if (e.w < closest[root_dest].w) {
         // #pragma omp atomic write
-        closest[root_dest] = clone_edge(&e);
+        clone_edge(&e, &closest[root_dest]);
       }
     }
 
@@ -83,7 +83,7 @@ void adj_boruvka(AG *g, AG *mst) {
           #if OMP == 0
             for (int j = 0; j < V; j++) {
               if (closest_local[j].w < closest[j].w) {
-                closest[j] = clone_edge(&closest_local[j]);
+                clone_edge(&closest_local[j], &closest[j]);
               }
             }
           #else
@@ -121,7 +121,9 @@ void adj_boruvka(AG *g, AG *mst) {
           // #pragma omp critical
           {
             // if (rank == 0) {
-            mst->edges[mst_edges++] = clone_edge(&closest[j]);
+            // mst->edges[mst_edges++] = clone_edge(&closest[j]);
+            clone_edge(&closest[j], &mst->edges[mst_edges]);
+            mst_edges++;
             // }
             unite(mfset, root_src, root_dest);
           }

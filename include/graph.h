@@ -28,10 +28,10 @@ typedef struct Edge {
 
 /*
  * Clones the edge `e`.
- * @param `e`: pointer to the edge
- * @return `Edge`: cloned edge
+ * @param `to`: pointer to the destination edge
+ * @param `from`: pointer to the source edge
 */
-Edge clone_edge(Edge*);
+void clone_edge(Edge*, Edge*);
 
 /*
  * Graph in adjacency list format.

@@ -47,12 +47,10 @@ AG *init_from_file(const char *filename) {
   return g;
 }
 
-Edge clone_edge(Edge *e) {
-  Edge clone;
-  clone.src = e->src;
-  clone.dest = e->dest;
-  clone.w = e->w;
-  return clone;
+void clone_edge(Edge *from, Edge *to) {
+  to->src = from->src;
+  to->dest = from->dest;
+  to->w = from->w;
 }
 
 void print_file_adj_graph(AG *g, const char *filename) {
