@@ -23,7 +23,7 @@ make
 You can customize the compilation process by passing the following options to `make`:
 
 - `GEN=<num>`: Generate a random graph with `<num>` vertices and edges. Default is `0`, which means a preexisting `graph.txt` file will be used.
-- `MAX=<num>`: Set the maximum weight for random edge generation. Default is `200`.
+- `MAX=<num>`: Set the maximum weight for random edge generation. Default is `50000`.
 - `MIN=<num>`: Set the minimum weight for random edge generation. Default is `1`.
 - `INPUT=/path/to/file`: Specify a custom input file. Default is `graph.txt`. If `GEN` and `SAVE` are set, this file will be used to save the generated graph.
 - `OUTPUT=/path/to/file`: Specify a custom output file. Default is `mst.txt`. This file will contain the resulting MST. The option `SAVE` must be set to `1` to save the MST.

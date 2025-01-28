@@ -35,8 +35,8 @@ GEN ?= 0
 SAVE ?= 0
 DEBUG ?= 0
 
-MAX ?= 200
-MIN ?= 5
+MAX ?= 50000
+MIN ?= 1
 
 
 # rules
