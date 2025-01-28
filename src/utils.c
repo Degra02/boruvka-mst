@@ -14,7 +14,7 @@
 
 extern double program_start_time;
 
-void print_debug(const char *format, const char *color, const int rank, ...) {
+void debug(const char *format, const char *color, const int rank, ...) {
   if (DEBUG) {
     va_list args;
     va_start(args, rank);
@@ -44,7 +44,7 @@ unsigned int get_random() {
 
 AG* generate_graph(const int V) {
   AG *g = init_adj_graph(V, V * (V - 1) / 2);
-  print_debug("Generating graph. V = %d, E = %d", ANSI_COLOR_GREEN, 0, V, V * (V - 1) / 2);
+  debug("Generating graph. V = %d, E = %d", ANSI_COLOR_GREEN, 0, V, V * (V - 1) / 2);
 
   FILE *random = fopen("/dev/urandom", "r");
   if (random == NULL) {
@@ -52,7 +52,7 @@ AG* generate_graph(const int V) {
     exit(1);
   }
 
-  print_debug("Assigning random weights...", ANSI_COLOR_YELLOW, 0);
+  debug("Assigning random weights...", ANSI_COLOR_YELLOW, 0);
   unsigned int random_value;
   for (int i = 0, k = 0; i < V; i++) {
     for (int j = i + 1; j < V; j++, k++) {
@@ -62,7 +62,7 @@ AG* generate_graph(const int V) {
       g->edges[k].w = (random_value % MAX) + MIN;
     }
   }
-  print_debug("Random weights assigned.", ANSI_COLOR_GREEN, 0);
+  debug("Random weights assigned.", ANSI_COLOR_GREEN, 0);
 
   return g;
 }
@@ -70,7 +70,7 @@ AG* generate_graph(const int V) {
 void Bcast_adj_graph(AG **g, MPI_Comm comm) {
   int V, E;
   if ((*g) != NULL) {
-    print_debug("Broadcasting graph V = %d, E = %d", ANSI_COLOR_YELLOW, 0, (*g)->V, (*g)->E);
+    debug("Broadcasting graph V = %d, E = %d", ANSI_COLOR_YELLOW, 0, (*g)->V, (*g)->E);
     V = (*g)->V;
     E = (*g)->E;
   }
@@ -89,8 +89,8 @@ void Bcast_adj_graph(AG **g, MPI_Comm comm) {
   int rank;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   if (rank != 0) {
-    print_debug("Graph broadcasted. V = %d, E = %d", ANSI_COLOR_GREEN, rank, V,
+    debug("Graph broadcasted. V = %d, E = %d", ANSI_COLOR_GREEN, rank, V,
                 E);
-    print_debug("V = %d, E = %d", ANSI_COLOR_CYAN, rank, V, E);
+    debug("V = %d, E = %d", ANSI_COLOR_CYAN, rank, V, E);
   }
 }

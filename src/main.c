@@ -14,10 +14,6 @@
 #define SAVE 0
 #endif
 
-#ifndef OMP
-#define OMP 0
-#endif
-
 #ifndef INPUT
 #define INPUT "graph.txt"
 #endif
@@ -30,10 +26,6 @@ double program_start_time;
 
 int main(int argc, char *argv[]) {
   srand(time(NULL));
-  if (argc != 3) {
-    fprintf(stderr, "Usage: %s <graph-file> <output-file>\n", argv[0]);
-    exit(1);
-  }
 
   int rank, size;
   MPI_Init(&argc, &argv);
@@ -50,18 +42,18 @@ int main(int argc, char *argv[]) {
   if (rank == 0) {
     switch (GEN) {
       case 0:
-        print_debug("Loading graph from %s ...", ANSI_COLOR_YELLOW, rank, INPUT);
+        debug("Loading graph from %s ...", ANSI_COLOR_YELLOW, rank, INPUT);
         g = init_from_file(INPUT);
-        print_debug("Graph loaded.", ANSI_COLOR_GREEN, rank);
+        debug("Graph loaded.", ANSI_COLOR_GREEN, rank);
         graph_generated = 1;
         break;
 
       default:
         g = generate_graph(GEN);
         if (SAVE) { 
-          print_debug("Saving graph to %s ...", ANSI_COLOR_YELLOW, rank, INPUT);
+          debug("Saving graph to %s ...", ANSI_COLOR_YELLOW, rank, INPUT);
           print_file_adj_graph(g, INPUT); 
-          print_debug("Graph saved.", ANSI_COLOR_GREEN, rank);
+          debug("Graph saved.", ANSI_COLOR_GREEN, rank);
         }
         graph_generated = 1;
         break;
@@ -71,33 +63,23 @@ int main(int argc, char *argv[]) {
   }
 
 
-  // if (GEN > 0 && rank == 0) {
-  //   // generate_complete_graph(GEN, argv[1]);
-  //   g = generate_graph(GEN);
-  //   graph_generated = 1;
-  // } else if (GEN == 0) {
-  //   graph_generated = 1;
-  // }
-
   MPI_Bcast(&graph_generated, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
 
   if (graph_generated && rank == 0) {
-    // g = init_from_file(argv[1]);
-    // print_debug("Graph loaded.", ANSI_COLOR_GREEN, rank);
     Bcast_adj_graph(&g, MPI_COMM_WORLD);
   } else {
     Bcast_adj_graph(&g, MPI_COMM_WORLD);
   }
 
-  print_debug("V = %d, E = %d", ANSI_COLOR_CYAN, rank, g->V, g->E);
+  debug("V = %d, E = %d", ANSI_COLOR_CYAN, rank, g->V, g->E);
   mst = init_adj_graph(g->V, g->V - 1);
   // not needed but just to be sure
   MPI_Barrier(MPI_COMM_WORLD);
-  // print_debug("Process reached barrier", ANSI_COLOR_YELLOW, rank);
+  // debug("Process reached barrier", ANSI_COLOR_YELLOW, rank);
 
   double start_time;
-  print_debug("Starting Boruvka...", ANSI_COLOR_MAGENTA, rank);
+  debug("Starting Boruvka...", ANSI_COLOR_MAGENTA, rank);
   start_time = MPI_Wtime();
   adj_boruvka(g, mst);
 

@@ -27,7 +27,7 @@
  * @params ... Additional parameters to format the message.
  */
 // void print_debug(const char *, const char *, const int);
-void print_debug(const char *, const char *, const int, ...);
+void debug(const char *, const char *, const int, ...);
 
 /*
  * Get a random number.
