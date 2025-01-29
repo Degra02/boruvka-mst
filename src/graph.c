@@ -1,4 +1,5 @@
 #include "../include/graph.h"
+#include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -13,6 +14,7 @@ AG *init_adj_graph(const int V, const int E) {
   g->E = E;
 
   g->edges = (Edge *)malloc(E * sizeof(Edge));
+  // MPI_Alloc_mem(E * 3 * sizeof(int), MPI_INFO_NULL, &g->edges);
   if (g->edges == NULL) {
     fprintf(stderr, "Error: unable to allocate memory for graph's edges\n");
     exit(1);

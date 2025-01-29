@@ -7,6 +7,10 @@ ifeq ($(OMP), 1)
     CFLAGS += -fopenmp
 endif
 
+ifeq ($(DEBUG), 1)
+	CFLAGS += -g
+endif
+
 # needed directories
 SRC_DIR = src
 INC_DIR = include
