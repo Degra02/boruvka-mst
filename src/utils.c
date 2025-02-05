@@ -84,7 +84,7 @@ void Bcast_adj_graph(AG **g, MPI_Comm comm) {
   // MPI_Request request;
   // MPI_Ibcast(( *g )->edges, E * 3, MPI_INT, 0, comm, &request);
   // MPI_Wait(&request, MPI_STATUS_IGNORE);
-  MPI_Bcast((*g)->edges, E * 3, MPI_INT, 0, comm);
+  // MPI_Bcast((*g)->edges, E * 3, MPI_INT, 0, comm);
 
   int rank;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);

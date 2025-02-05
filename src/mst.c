@@ -43,7 +43,8 @@ void adj_boruvka(AG *g, AG *mst) {
   //               MPI_COMM_WORLD);
   // }
   
-  debug("Starting scatter of edges", ANSI_COLOR_CYAN, rank);
+  if (rank == 0) debug("Starting scatter of edges", ANSI_COLOR_CYAN, rank);
+
   MPI_Scatter(g->edges, edges_per_proc * 3, MPI_INT, local_edges, edges_per_proc * 3, MPI_INT, 0, MPI_COMM_WORLD);
   debug("Finished scatter of edges", ANSI_COLOR_CYAN, rank);
 

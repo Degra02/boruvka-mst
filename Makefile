@@ -1,6 +1,6 @@
 # specify compiler and compiler flags
 CC = mpicc
-CFLAGS = -Wall -Wextra -fopenmp
+CFLAGS = -Wall -Wextra -fopenmp -std=c99
 
 # conditional inclusion of openmp flag if OMP is defined
 # ifeq ($(OMP), 1)
@@ -16,8 +16,8 @@ SRC_DIR = src
 INC_DIR = include
 
 # MPI
-MPI_LIBS = $(shell mpicc --showme:link)
-LIBS = -lm
+# MPI_LIBS = $(shell mpicc --showme:link)
+# LIBS = -lm
 
 # source files
 SRCS = $(wildcard $(SRC_DIR)/*.c)
@@ -47,7 +47,9 @@ MIN ?= 1
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) $(MPI_LIBS)
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) 
+
+#$(MPI_LIBS)
 
 %.o: %.c
 	$(CC) -c $< -o $@ -DGEN=$(GEN) -DMAX=$(MAX) -DMIN=$(MIN) -DSAVE=$(SAVE) -DDEBUG=$(DEBUG) $(CFLAGS)
