@@ -1,11 +1,11 @@
 # specify compiler and compiler flags
 CC = mpicc
-CFLAGS = -Wall -Wextra
+CFLAGS = -Wall -Wextra -fopenmp
 
 # conditional inclusion of openmp flag if OMP is defined
-ifeq ($(OMP), 1)
-    CFLAGS += -fopenmp
-endif
+# ifeq ($(OMP), 1)
+#     CFLAGS += -fopenmp
+# endif
 
 ifeq ($(DEBUG), 1)
 	CFLAGS += -g

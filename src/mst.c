@@ -27,13 +27,30 @@ void adj_boruvka(AG *g, AG *mst) {
   //local_edges = (Edge *)malloc(edges_per_proc * sizeof(Edge)); 
   MPI_Alloc_mem(edges_per_proc * 3 * sizeof(int), MPI_INFO_NULL, &local_edges);
 
-  MPI_Scatter(g->edges, edges_per_proc * 3, MPI_INT, local_edges,
-              edges_per_proc * 3, MPI_INT, 0, MPI_COMM_WORLD);
+  // transform the scatter into many scatters of 2GB chunks
+  // int edges_per_chunk = 2 * 1024 * 1024 * 1024 / (3 * sizeof(int));
+  // int chunks = (edges_per_proc + edges_per_chunk - 1) / edges_per_chunk;
+  // int chunk_size = edges_per_chunk * 3;
+  //
+  // for (int i = 0; i < chunks; i++) {
+  //   int chunk_edges = edges_per_chunk;
+  //   if (i == chunks - 1) {
+  //     chunk_edges = edges_per_proc - i * edges_per_chunk;
+  //   }
+  //
+  //   MPI_Scatter(g->edges + i * edges_per_chunk, chunk_size, MPI_INT,
+  //               local_edges + i * edges_per_chunk, chunk_size, MPI_INT, 0,
+  //               MPI_COMM_WORLD);
+  // }
+  
+  debug("Starting scatter of edges", ANSI_COLOR_CYAN, rank);
+  MPI_Scatter(g->edges, edges_per_proc * 3, MPI_INT, local_edges, edges_per_proc * 3, MPI_INT, 0, MPI_COMM_WORLD);
+  debug("Finished scatter of edges", ANSI_COLOR_CYAN, rank);
 
   if (rank == size - 1 && E % edges_per_proc != 0) {
     edges_per_proc = E % edges_per_proc;
   }
-  debug("edges_per_proc = %d", ANSI_COLOR_CYAN, rank, edges_per_proc);
+  // debug("edges_per_proc = %d", ANSI_COLOR_CYAN, rank, edges_per_proc);
 
   // TODO: check if the size is compatible with the number of processes
 
