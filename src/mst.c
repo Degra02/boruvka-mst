@@ -24,8 +24,9 @@ void adj_boruvka(AG *g, AG *mst) {
   // split edges among processes
   int edges_per_proc = (E + size - 1) / size;
   Edge *local_edges;
-  //local_edges = (Edge *)malloc(edges_per_proc * sizeof(Edge)); 
+  local_edges = (Edge *)malloc(edges_per_proc * sizeof(Edge)); 
   MPI_Alloc_mem(edges_per_proc * 3 * sizeof(int), MPI_INFO_NULL, &local_edges);
+  debug("Allocated memory for local edges", ANSI_COLOR_CYAN, rank);
 
   // transform the scatter into many scatters of 2GB chunks
   // int edges_per_chunk = 2 * 1024 * 1024 * 1024 / (3 * sizeof(int));
@@ -46,16 +47,14 @@ void adj_boruvka(AG *g, AG *mst) {
   if (rank == 0) debug("Starting scatter of edges", ANSI_COLOR_CYAN, rank);
 
   MPI_Scatter(g->edges, edges_per_proc * 3, MPI_INT, local_edges, edges_per_proc * 3, MPI_INT, 0, MPI_COMM_WORLD);
-  debug("Finished scatter of edges", ANSI_COLOR_CYAN, rank);
+  if (rank != 0) debug("Finished receiving edges", ANSI_COLOR_GREEN, rank);
 
   if (rank == size - 1 && E % edges_per_proc != 0) {
     edges_per_proc = E % edges_per_proc;
   }
   // debug("edges_per_proc = %d", ANSI_COLOR_CYAN, rank, edges_per_proc);
 
-  // TODO: check if the size is compatible with the number of processes
 
-  // HACK: should MPI_Alloc_mem be used?
   MFSet *mfset = init_mfset(V);
 
 
@@ -65,6 +64,7 @@ void adj_boruvka(AG *g, AG *mst) {
   // closest = (Edge *)malloc(V * sizeof(Edge));
   // closest_local = (Edge *)malloc(V * sizeof(Edge));
 
+  debug("Allocating memory for closest edges", ANSI_COLOR_CYAN, rank);
   MPI_Alloc_mem(V * 3 * sizeof(int), MPI_INFO_NULL, &closest);
   MPI_Alloc_mem(V * 3 * sizeof(int), MPI_INFO_NULL, &closest_local);
 
@@ -127,6 +127,7 @@ void adj_boruvka(AG *g, AG *mst) {
       }
     }
 
+    debug("Broadcasting closest edges", ANSI_COLOR_CYAN, rank);
     MPI_Bcast(closest, V * 3, MPI_INT, 0, MPI_COMM_WORLD);
 
     for (int j = 0; j < V; j++) {
