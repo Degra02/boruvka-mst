@@ -8,7 +8,7 @@
 #include <time.h>
 
 double program_start_time;
-int verbose;
+int verbose = 0;
 int max = 50000;
 int min = 1;
 
@@ -49,6 +49,7 @@ int main(int argc, char *argv[]) {
       } else if (strcmp(argv[i], "-min") == 0) {
         min = atoi(argv[i + 1]);
         i++;
+      }
     }
   }
 

@@ -4,16 +4,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifndef MAX
-#define MAX 200
-#endif
-
-#ifndef MIN
-#define MIN 1
-#endif
-
 extern double program_start_time;
 extern int verbose;
+extern int max;
+extern int min;
 
 void debug(const char *format, const char *color, const int rank, ...) {
   if (verbose) {
@@ -60,7 +54,7 @@ AG* generate_graph(const int V) {
       fread(&random_value, sizeof(unsigned int), 1, random);
       g->edges[k].src = i;
       g->edges[k].dest = j;
-      g->edges[k].w = (random_value % MAX) + MIN;
+      g->edges[k].w = (random_value % max) + min;
     }
   }
   debug("Random weights assigned.", ANSI_COLOR_GREEN, 0);
