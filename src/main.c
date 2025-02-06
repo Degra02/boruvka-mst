@@ -17,6 +17,7 @@ int main(int argc, char *argv[]) {
 
   int gen = 0;
   int save = 0;
+  int save_output = 0;
   char *input = malloc(256 * sizeof(char));
   char *output = malloc(256 * sizeof(char));
 
@@ -28,28 +29,27 @@ int main(int argc, char *argv[]) {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  if (rank == 0) {
-    for (int i = 1; i < argc; i++) {
-      if (strcmp(argv[i], "-g") == 0) {
-        gen = atoi(argv[i + 1]);
-        i++;
-      } else if (strcmp(argv[i], "-v") == 0) {
-        verbose = 1;
-      } else if (strcmp(argv[i], "-s") == 0) {
-        save = 1;
-      } else if (strcmp(argv[i], "-i") == 0) {
-        input = argv[i + 1];
-        i++;
-      } else if (strcmp(argv[i], "-o") == 0) {
-        output = argv[i + 1];
-        i++;
-      } else if (strcmp(argv[i], "-max") == 0) {
-        max = atoi(argv[i + 1]);
-        i++;
-      } else if (strcmp(argv[i], "-min") == 0) {
-        min = atoi(argv[i + 1]);
-        i++;
-      }
+  for (int i = 1; i < argc; i++) {
+    if (strcmp(argv[i], "-g") == 0) {
+      gen = atoi(argv[i + 1]);
+      i++;
+    } else if (strcmp(argv[i], "-v") == 0) {
+      verbose = 1;
+    } else if (strcmp(argv[i], "-s") == 0) {
+      save = 1;
+    } else if (strcmp(argv[i], "-i") == 0) {
+      input = argv[i + 1];
+      i++;
+    } else if (strcmp(argv[i], "-o") == 0) {
+      save_output = 1;
+      output = argv[i + 1];
+      i++;
+    } else if (strcmp(argv[i], "-max") == 0) {
+      max = atoi(argv[i + 1]);
+      i++;
+    } else if (strcmp(argv[i], "-min") == 0) {
+      min = atoi(argv[i + 1]);
+      i++;
     }
   }
 
@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
     // printf("[END] %s MST Time: %f %s\n", ANSI_COLOR_BLUE, end_time - start_time, ANSI_COLOR_RESET);
     printf("%f\n", end_time - start_time);
 
-    if (save) print_file_mst(mst, output);
+    if (save_output) print_file_mst(mst, output);
   }
 
   // clean up
