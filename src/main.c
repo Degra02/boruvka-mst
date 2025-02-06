@@ -85,7 +85,8 @@ int main(int argc, char *argv[]) {
 
   if (rank == 0) {
     double end_time = MPI_Wtime();
-    printf("[END] %s MST Time: %f %s\n", ANSI_COLOR_BLUE, end_time - start_time, ANSI_COLOR_RESET);
+    // printf("[END] %s MST Time: %f %s\n", ANSI_COLOR_BLUE, end_time - start_time, ANSI_COLOR_RESET);
+    printf("%f\n", end_time - start_time);
 
     if (SAVE) print_file_mst(mst, OUTPUT);
   }
