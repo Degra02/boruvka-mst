@@ -13,9 +13,10 @@
 #endif
 
 extern double program_start_time;
+extern int verbose;
 
 void debug(const char *format, const char *color, const int rank, ...) {
-  if (DEBUG) {
+  if (verbose) {
     va_list args;
     va_start(args, rank);
 

@@ -2,15 +2,6 @@
 CC = mpicc
 CFLAGS = -Wall -Wextra -fopenmp -std=c99
 
-# conditional inclusion of openmp flag if OMP is defined
-# ifeq ($(OMP), 1)
-#     CFLAGS += -fopenmp
-# endif
-
-ifeq ($(DEBUG), 1)
-	CFLAGS += -g
-endif
-
 # needed directories
 SRC_DIR = src
 INC_DIR = include
@@ -30,17 +21,13 @@ TARGET = mst
 # n. processors
 NP = 1
 
-# input and output files, README contains more info
-INPUT = "graph.txt"
-OUTPUT = "mst.txt"
-
 # some defines
-GEN ?= 0
-SAVE ?= 0
-DEBUG ?= 0
-
-MAX ?= 50000
-MIN ?= 1
+# GEN ?= 0
+# SAVE ?= 0
+# DEBUG ?= 0
+#
+# MAX ?= 50000
+# MIN ?= 1
 
 
 # rules
@@ -52,15 +39,16 @@ $(TARGET): $(OBJS)
 #$(MPI_LIBS)
 
 %.o: %.c
-	$(CC) -c $< -o $@ -DGEN=$(GEN) -DMAX=$(MAX) -DMIN=$(MIN) -DSAVE=$(SAVE) -DDEBUG=$(DEBUG) $(CFLAGS)
+	$(CC) -c $< -o $@ $(CFLAGS)
 
-run: clean $(TARGET)
-	mpirun -np $(NP) ./$(TARGET) $(INPUT) $(OUTPUT)
+# -DGEN=$(GEN) -DMAX=$(MAX) -DMIN=$(MIN) -DSAVE=$(SAVE) -DDEBUG=$(DEBUG)
 
-
-debug: DEBUG=1
-debug: clean $(TARGET)
-	mpirun -np $(NP) ./$(TARGET) $(INPUT) $(OUTPUT)
+# run: $(TARGET)
+# 	mpirun -np $(NP) ./$(TARGET) -i $(INPUT) -o $(OUTPUT)
+#
+#
+# debug: $(TARGET)
+# 	mpirun -np $(NP) ./$(TARGET) $(INPUT) $(OUTPUT) -v
 
 
 clean:

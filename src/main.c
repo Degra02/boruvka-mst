@@ -4,33 +4,53 @@
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
-#ifndef GEN
-#define GEN 0
-#endif
-
-#ifndef SAVE
-#define SAVE 0
-#endif
-
-#ifndef INPUT
-#define INPUT "graph.txt"
-#endif
-
-#ifndef OUTPUT
-#define OUTPUT "mst.txt"
-#endif
-
 double program_start_time;
+int verbose;
+int max = 50000;
+int min = 1;
 
 int main(int argc, char *argv[]) {
   srand(time(NULL));
+
+  int gen = 0;
+  int save = 0;
+  char *input = malloc(256 * sizeof(char));
+  char *output = malloc(256 * sizeof(char));
+
+  input = "graph.txt";
+  output = "mst.txt";
 
   int rank, size;
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+  if (rank == 0) {
+    for (int i = 1; i < argc; i++) {
+      if (strcmp(argv[i], "-g") == 0) {
+        gen = atoi(argv[i + 1]);
+        i++;
+      } else if (strcmp(argv[i], "-v") == 0) {
+        verbose = 1;
+      } else if (strcmp(argv[i], "-s") == 0) {
+        save = 1;
+      } else if (strcmp(argv[i], "-i") == 0) {
+        input = argv[i + 1];
+        i++;
+      } else if (strcmp(argv[i], "-o") == 0) {
+        output = argv[i + 1];
+        i++;
+      } else if (strcmp(argv[i], "-max") == 0) {
+        max = atoi(argv[i + 1]);
+        i++;
+      } else if (strcmp(argv[i], "-min") == 0) {
+        min = atoi(argv[i + 1]);
+        i++;
+    }
+  }
 
   program_start_time = MPI_Wtime();
 
@@ -40,19 +60,19 @@ int main(int argc, char *argv[]) {
   int graph_generated = 0;
 
   if (rank == 0) {
-    switch (GEN) {
+    switch (gen) {
       case 0:
-        debug("Loading graph from %s ...", ANSI_COLOR_YELLOW, rank, INPUT);
-        g = init_from_file(INPUT);
+        debug("Loading graph from %s ...", ANSI_COLOR_YELLOW, rank, input);
+        g = init_from_file(input);
         debug("Graph loaded.", ANSI_COLOR_GREEN, rank);
         graph_generated = 1;
         break;
 
       default:
-        g = generate_graph(GEN);
-        if (SAVE) { 
-          debug("Saving graph to %s ...", ANSI_COLOR_YELLOW, rank, INPUT);
-          print_file_adj_graph(g, INPUT); 
+        g = generate_graph(gen);
+        if (save) { 
+          debug("Saving graph to %s ...", ANSI_COLOR_YELLOW, rank, input);
+          print_file_adj_graph(g, input); 
           debug("Graph saved.", ANSI_COLOR_GREEN, rank);
         }
         graph_generated = 1;
@@ -88,7 +108,7 @@ int main(int argc, char *argv[]) {
     // printf("[END] %s MST Time: %f %s\n", ANSI_COLOR_BLUE, end_time - start_time, ANSI_COLOR_RESET);
     printf("%f\n", end_time - start_time);
 
-    if (SAVE) print_file_mst(mst, OUTPUT);
+    if (save) print_file_mst(mst, output);
   }
 
   // clean up

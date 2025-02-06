@@ -5,9 +5,6 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#ifndef DEBUG
-#define DEBUG 0
-#endif
 
 #define ANSI_COLOR_RED "\x1b[31m"
 #define ANSI_COLOR_GREEN "\x1b[32m"
