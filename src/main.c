@@ -113,7 +113,8 @@ int main(int argc, char *argv[]) {
   }
 
   // clean up
-  free_adj_graph(g);
+  // free_adj_graph(g);
+  free(g);
   free_adj_graph(mst);
 
   MPI_Finalize();

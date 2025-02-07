@@ -24,9 +24,15 @@ void adj_boruvka(AG *g, AG *mst) {
   // split edges among processes
   int edges_per_proc = (E + size - 1) / size;
   Edge *local_edges;
-  local_edges = (Edge *)malloc(edges_per_proc * sizeof(Edge)); 
+  // local_edges = (Edge *)malloc(edges_per_proc * sizeof(Edge)); 
   MPI_Alloc_mem(edges_per_proc * 3 * sizeof(int), MPI_INFO_NULL, &local_edges);
-  debug("Allocated memory for local edges", ANSI_COLOR_CYAN, rank);
+
+  if (local_edges == NULL) {
+    debug("Failed to allocate memory for local edges", ANSI_COLOR_RED, rank);
+    MPI_Abort(MPI_COMM_WORLD, 1);
+  } else {
+    debug("Allocated memory for local edges", ANSI_COLOR_CYAN, rank);
+  }
 
   // transform the scatter into many scatters of 2GB chunks
   // int edges_per_chunk = 2 * 1024 * 1024 * 1024 / (3 * sizeof(int));
@@ -46,7 +52,29 @@ void adj_boruvka(AG *g, AG *mst) {
   
   if (rank == 0) debug("Starting scatter of edges", ANSI_COLOR_CYAN, rank);
 
-  MPI_Scatter(g->edges, edges_per_proc * 3, MPI_INT, local_edges, edges_per_proc * 3, MPI_INT, 0, MPI_COMM_WORLD);
+  // int scatter_res = MPI_Scatter(g->edges, edges_per_proc * 3, MPI_INT, local_edges, edges_per_proc * 3, MPI_INT, 0, MPI_COMM_WORLD);
+  // if (scatter_res != MPI_SUCCESS) {
+  //   debug("Failed to scatter edges", ANSI_COLOR_RED, rank);
+  //   MPI_Abort(MPI_COMM_WORLD, 1);
+  // }
+
+    if (rank == 0) {
+    int scatter_res = MPI_Scatter(g->edges, edges_per_proc * 3, MPI_INT, local_edges, edges_per_proc * 3, MPI_INT, 0, MPI_COMM_WORLD);
+    if (scatter_res != MPI_SUCCESS) {
+      debug("Failed to scatter edges", ANSI_COLOR_RED, rank);
+      MPI_Abort(MPI_COMM_WORLD, 1);
+    }    
+
+    free(g->edges);
+  } else {
+    int scatter_res = MPI_Scatter(NULL, edges_per_proc * 3, MPI_INT, local_edges, edges_per_proc * 3, MPI_INT, 0, MPI_COMM_WORLD);
+    if (scatter_res != MPI_SUCCESS) {
+      debug("Failed to scatter edges", ANSI_COLOR_RED, rank);
+      MPI_Abort(MPI_COMM_WORLD, 1);
+    }    
+  }
+
+
   if (rank != 0) debug("Finished receiving edges", ANSI_COLOR_GREEN, rank);
 
   if (rank == size - 1 && E % edges_per_proc != 0) {
@@ -68,6 +96,7 @@ void adj_boruvka(AG *g, AG *mst) {
   MPI_Alloc_mem(V * 3 * sizeof(int), MPI_INFO_NULL, &closest);
   MPI_Alloc_mem(V * 3 * sizeof(int), MPI_INFO_NULL, &closest_local);
 
+  MPI_Barrier(MPI_COMM_WORLD);
 
   for (int i = 1; i < V && mst_edges < V - 1; i *= 2) {
     #pragma omp parallel for
