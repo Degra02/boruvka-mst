@@ -6,7 +6,7 @@ graph.txt
 big-graph.txt
 mst.txt
 
-graph.dot
+graph_images/
 
 perf.data
 
