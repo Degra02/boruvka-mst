@@ -77,10 +77,10 @@ void print_file_mst(AG *mst, const char* filename) {
   fprintf(file, "%d %d\n", mst->V, mst->E);
   for (int i = 0; i < mst->E; i++) {
     sum += mst->edges[i].w;
-    fprintf(file, "%5d - %5d | %5d\n", mst->edges[i].src, mst->edges[i].dest,
+    fprintf(file, "%d %d %d\n", mst->edges[i].src, mst->edges[i].dest,
             mst->edges[i].w);
   }
-  fprintf(file, "Total weight: %d\n", sum);
+  // fprintf(file, "Total weight: %d\n", sum);
 
   fclose(file);
 

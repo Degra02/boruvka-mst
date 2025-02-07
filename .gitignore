@@ -6,6 +6,8 @@ graph.txt
 big-graph.txt
 mst.txt
 
+graph.dot
+
 perf.data
 
 *.tape

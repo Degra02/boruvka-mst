@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
     // printf("[END] %s MST Time: %f %s\n", ANSI_COLOR_BLUE, end_time - start_time, ANSI_COLOR_RESET);
     printf("%f\n", end_time - start_time);
 
-    if (save_output) print_file_mst(mst, output);
+    if (save || save_output) print_file_mst(mst, output);
   }
 
   // clean up
