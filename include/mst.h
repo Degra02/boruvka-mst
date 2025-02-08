@@ -2,6 +2,7 @@
 #define MST_H
 
 #include "graph.h"
+#include <mpi.h>
 
 /*
 * Adjacency list implementation
@@ -9,7 +10,7 @@
 * @param `mst`: pointer to the minimum spanning tree
 * @return `AG*`: pointer to the minimum spanning tree
 */
-void adj_boruvka(AG*, AG*);
+void adj_boruvka(AG*, AG*, int, int, MPI_Comm);
 
 // void find_min_edge(CSRG*);
 // void remove_mirror_edges(CSRG*);

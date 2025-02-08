@@ -9,6 +9,7 @@
  * @attr `E`: number of edges
  * @attr `adj`: 2D array of size `|V| x |V|` mapping each edge to its weight
 */
+#include <mpi.h>
 typedef struct M_Graph {
   int V, E;
   int **adj;
@@ -24,6 +25,9 @@ typedef struct M_Graph {
 typedef struct Edge {
   int src, dest, w;
 } Edge;
+
+
+void create_edge_mpi_type(MPI_Datatype *);
 
 
 /*

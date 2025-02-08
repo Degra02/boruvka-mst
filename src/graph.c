@@ -3,6 +3,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+void create_edge_mpi_type(MPI_Datatype *MPI_Edge) {
+  int blocklengths[3] = {1, 1, 1};
+  MPI_Datatype types[3] = {MPI_INT, MPI_INT, MPI_INT};
+  MPI_Aint offsets[3];
+
+  offsets[0] = offsetof(Edge, src);
+  offsets[1] = offsetof(Edge, dest);
+  offsets[2] = offsetof(Edge, w);
+
+  MPI_Type_create_struct(3, blocklengths, offsets, types, MPI_Edge);
+  MPI_Type_commit(MPI_Edge);
+}
+
 AG *init_adj_graph(const int V, const int E) {
   AG *g = (AG *)malloc(sizeof(AG));
   if (g == NULL) {
