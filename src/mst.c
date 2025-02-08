@@ -23,7 +23,7 @@ void adj_boruvka(AG *g, AG *mst, int rank, int size, MPI_Comm comm) {
   // MPI_Datatype edge_type;
   // create_edge_mpi_type(&edge_type);
 
-  int V, E;
+  uint32_t V, E;
   V = g->V;
   E = g->E;
 
@@ -37,8 +37,8 @@ void adj_boruvka(AG *g, AG *mst, int rank, int size, MPI_Comm comm) {
 
   // split edges among processes
   uint32_t edges_per_proc = (E + size - 1) / size;
-  int *local_edges;
-  local_edges = (int *)malloc(edges_per_proc * 3 * sizeof(int));
+  uint32_t *local_edges;
+  local_edges = (uint32_t *)malloc(edges_per_proc * 3 * sizeof(uint32_t));
   // MPI_Alloc_mem(edges_per_proc * sizeof(Edge), MPI_INFO_NULL, &local_edges);
 
   if (local_edges == NULL) {
@@ -52,8 +52,8 @@ void adj_boruvka(AG *g, AG *mst, int rank, int size, MPI_Comm comm) {
     debug("Starting scatter of edges", ANSI_COLOR_CYAN, rank);
 
   int scatter_res =
-    MPI_Scatter(g->edges, edges_per_proc * 3, MPI_INT, local_edges,
-                edges_per_proc * 3, MPI_INT, 0, comm);
+    MPI_Scatter(g->edges, edges_per_proc * 3, MPI_UNSIGNED, local_edges,
+                edges_per_proc * 3, MPI_UNSIGNED, 0, comm);
   if (scatter_res != MPI_SUCCESS) {
     debug("Failed to scatter edges", ANSI_COLOR_RED, rank);
     MPI_Abort(comm, 1);
@@ -61,26 +61,6 @@ void adj_boruvka(AG *g, AG *mst, int rank, int size, MPI_Comm comm) {
 
   // safe to free the original edges
   free(g->edges);
-
-  // if (rank == 0) {
-  //   int scatter_res =
-  //       MPI_Scatter(g->edges, edges_per_proc, edge_type , local_edges,
-  //                   edges_per_proc, edge_type, 0, comm);
-  //   if (scatter_res != MPI_SUCCESS) {
-  //     debug("Failed to scatter edges", ANSI_COLOR_RED, rank);
-  //     MPI_Abort(comm, 1);
-  //   }
-  //
-  //   free(g->edges);
-  // } else {
-  //   int scatter_res =
-  //       MPI_Scatter(NULL, edges_per_proc, edge_type, local_edges,
-  //                   edges_per_proc, edge_type, 0, comm);
-  //   if (scatter_res != MPI_SUCCESS) {
-  //     debug("Failed to scatter edges", ANSI_COLOR_RED, rank);
-  //     MPI_Abort(comm, 1);
-  //   }
-  // }
 
   if (rank != 0)
     debug("Finished receiving edges", ANSI_COLOR_GREEN, rank);
@@ -92,11 +72,11 @@ void adj_boruvka(AG *g, AG *mst, int rank, int size, MPI_Comm comm) {
 
   MFSet *mfset = init_mfset(V);
 
-  int mst_edges = 0;
-  int *closest;
-  int *closest_local;
-  closest = (int *)malloc(V * 3 * sizeof(int));
-  closest_local = (int *)malloc(V * 3 * sizeof(int));
+  uint32_t mst_edges = 0;
+  uint32_t *closest;
+  uint32_t *closest_local;
+  closest = (uint32_t *)malloc(V * 3 * sizeof(uint32_t));
+  closest_local = (uint32_t *)malloc(V * 3 * sizeof(uint32_t));
 
   debug("Allocating memory for closest edges", ANSI_COLOR_CYAN, rank);
   // MPI_Alloc_mem(V * 3 * sizeof(int), MPI_INFO_NULL, &closest);
@@ -104,19 +84,19 @@ void adj_boruvka(AG *g, AG *mst, int rank, int size, MPI_Comm comm) {
 
   MPI_Barrier(comm);
 
-  for (int i = 1; i < V && mst_edges < V - 1; i *= 2) {
+  for (uint32_t i = 1; i < V && mst_edges < V - 1; i *= 2) {
     #pragma omp parallel for
-    for (int j = 0; j < V; j++) {
+    for (uint32_t j = 0; j < V; j++) {
       closest[j*3 + 2] = INT_MAX;  
     }
 
     // search for the closest edge
     #pragma omp parallel for
-    for (int j = 0; j < edges_per_proc; j++) {
-      int *e = &local_edges[j * 3];
+    for (uint32_t j = 0; j < edges_per_proc; j++) {
+      uint32_t *e = &local_edges[j * 3];
 
-      int root_src = find(mfset, e[0]);
-      int root_dest = find(mfset, e[1]);
+      uint32_t root_src = find(mfset, e[0]);
+      uint32_t root_dest = find(mfset, e[1]);
 
       if (root_src == root_dest) {
         continue;
@@ -139,7 +119,7 @@ void adj_boruvka(AG *g, AG *mst, int rank, int size, MPI_Comm comm) {
       if (rank % (2 * st) == 0) {
         from = rank + st;
         if (from < size) {
-          MPI_Recv(closest_local, V * 3, MPI_INT, from, 0, comm,
+          MPI_Recv(closest_local, V * 3, MPI_UNSIGNED, from, 0, comm,
                    MPI_STATUS_IGNORE);
           // MPI_Irecv(closest_local, V * 3, MPI_INT, from, 0, comm,
           //           &request);
@@ -148,7 +128,7 @@ void adj_boruvka(AG *g, AG *mst, int rank, int size, MPI_Comm comm) {
           // static scheduling seems to be the best option, as the workload
           // is the same for each iteration
           #pragma omp parallel for schedule(static)
-          for (int j = 0; j < V; j++) {
+          for (uint32_t j = 0; j < V; j++) {
             if (closest_local[j*3 + 2] < closest[j*3 + 2]) {
               #pragma omp critical
               clone_edge(&closest_local[j*3], &closest[j*3]);
@@ -157,19 +137,19 @@ void adj_boruvka(AG *g, AG *mst, int rank, int size, MPI_Comm comm) {
         }
       } else if (rank % st == 0) {
         to = rank - st;
-        MPI_Send(closest, V * 3, MPI_INT, to, 0, comm);
+        MPI_Send(closest, V * 3, MPI_UNSIGNED, to, 0, comm);
         // MPI_Isend(closest, V * 3, MPI_INT, to, 0, comm, &request);
       }
     }
 
     debug("Broadcasting closest edges", ANSI_COLOR_CYAN, rank);
-    MPI_Bcast(closest, V * 3, MPI_INT, 0, comm);
+    MPI_Bcast(closest, V * 3, MPI_UNSIGNED, 0, comm);
 
-    for (int j = 0; j < V; j++) {
+    for (uint32_t j = 0; j < V; j++) {
       if (closest[j*3 + 2] != INT_MAX) {
         {
-          int root_src = find(mfset, closest[j*3]);
-          int root_dest = find(mfset, closest[j*3 + 1]);
+          uint32_t root_src = find(mfset, closest[j*3]);
+          uint32_t root_dest = find(mfset, closest[j*3 + 1]);
 
           if (root_src != root_dest) {
             clone_edge(&closest[j], &mst->edges[mst_edges]);

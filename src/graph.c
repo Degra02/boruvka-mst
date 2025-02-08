@@ -17,7 +17,7 @@ void create_edge_mpi_type(MPI_Datatype *MPI_Edge) {
   MPI_Type_commit(MPI_Edge);
 }
 
-AG *init_adj_graph(const int V, const int E) {
+AG *init_adj_graph(const uint32_t V, const uint32_t E) {
   AG *g = (AG *)malloc(sizeof(AG));
   if (g == NULL) {
     fprintf(stderr, "Error: unable to allocate memory for graph\n");
@@ -27,7 +27,7 @@ AG *init_adj_graph(const int V, const int E) {
   g->V = V;
   g->E = E;
 
-  g->edges = (int *)malloc(E * 3 * sizeof(int));
+  g->edges = (uint32_t *)malloc(E * 3 * sizeof(uint32_t));
   // MPI_Alloc_mem(E * 3 * sizeof(int), MPI_INFO_NULL, &g->edges);
   if (g->edges == NULL) {
     fprintf(stderr, "Error: unable to allocate memory for graph's edges\n");
@@ -49,11 +49,11 @@ AG *init_from_file(const char *filename) {
     exit(1);
   }
 
-  int V, E;
+  uint32_t V, E;
   fscanf(file, "%d %d", &V, &E);
   AG *g = init_adj_graph(V, E);
 
-  for (int i = 0; i < E; i++) {
+  for (uint32_t i = 0; i < E; i++) {
     fscanf(file, "%d %d %d", &g->edges[i*3], &g->edges[i*3 + 1],
            &g->edges[i*3 + 2]);
   }
@@ -72,7 +72,7 @@ void print_file_adj_graph(AG *g, const char *filename) {
   }
 
   fprintf(file, "%d %d\n", g->V, g->E);
-  for (int i = 0; i < g->E; i++) {
+  for (uint32_t i = 0; i < g->E; i++) {
     fprintf(file, "%d %d %d\n", g->edges[i*3], g->edges[i*3 + 1],
             g->edges[i*3 + 2]);
   }
@@ -89,7 +89,7 @@ void print_file_mst(AG *mst, const char* filename) {
 
   int sum = 0;
   fprintf(file, "%d %d\n", mst->V, mst->E);
-  for (int i = 0; i < mst->E; i++) {
+  for (uint32_t i = 0; i < mst->E; i++) {
     sum += mst->edges[i*3 + 2];
     fprintf(file, "%d %d %d\n", mst->edges[i*3], mst->edges[i*3 + 1],
             mst->edges[i*3 + 2]);

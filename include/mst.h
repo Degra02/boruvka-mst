@@ -8,6 +8,9 @@
 * Adjacency list implementation
 * @param `g`: pointer to the original graph
 * @param `mst`: pointer to the minimum spanning tree
+* @param `rank`: rank of the process
+* @param `size`: number of processes
+* @param `comm`: MPI communicator
 * @return `AG*`: pointer to the minimum spanning tree
 */
 void adj_boruvka(AG*, AG*, int, int, MPI_Comm);

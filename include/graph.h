@@ -10,6 +10,7 @@
  * @attr `adj`: 2D array of size `|V| x |V|` mapping each edge to its weight
 */
 #include <mpi.h>
+#include <stdint.h>
 typedef struct M_Graph {
   int V, E;
   int **adj;
@@ -43,7 +44,7 @@ void create_edge_mpi_type(MPI_Datatype *);
 //   to->w = from->w;
 // }
 
-static inline void clone_edge(int *from, int *to) {
+static inline void clone_edge(uint32_t *from, uint32_t *to) {
   to[0] = from[0];
   to[1] = from[1];
   to[2] = from[2];
@@ -56,8 +57,8 @@ static inline void clone_edge(int *from, int *to) {
  * @attr `edges`: array of size `|E|` containing all the edges
 */
 typedef struct Adj_Graph {
-  int V, E;
-  int *edges;
+  uint32_t V, E;
+  uint32_t *edges;
 } AG;
 
 /*
@@ -66,7 +67,7 @@ typedef struct Adj_Graph {
  * @param `E`: number of edges
  * @return `MG*`: pointer to the graph
 */
-AG* init_adj_graph(const int, const int);
+AG* init_adj_graph(const uint32_t, const uint32_t);
 
 /*
  * Frees the memory allocated for the graph.
