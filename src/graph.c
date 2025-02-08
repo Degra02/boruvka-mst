@@ -27,7 +27,7 @@ AG *init_adj_graph(const uint32_t V, const uint32_t E) {
   g->V = V;
   g->E = E;
 
-  g->edges = (uint32_t *)malloc(E * 3 * sizeof(uint32_t));
+  g->edges = (uint32_t *)calloc(E * 3, sizeof(uint32_t));
   // MPI_Alloc_mem(E * 3 * sizeof(int), MPI_INFO_NULL, &g->edges);
   if (g->edges == NULL) {
     fprintf(stderr, "Error: unable to allocate memory for graph's edges\n");

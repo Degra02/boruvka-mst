@@ -54,33 +54,13 @@ void adj_boruvka(AG *g, AG *mst, int rank, int size, MPI_Comm comm) {
   if (rank == 0)
     debug("Starting scatter of edges", ANSI_COLOR_CYAN, rank);
 
-  // int scatter_res =
-  //   MPI_Scatter(g->edges, edges_per_proc * 3, MPI_UNSIGNED, local_edges,
-  //               edges_per_proc * 3, MPI_UNSIGNED, 0, comm);
-  // if (scatter_res != MPI_SUCCESS) {
-  //   debug("Failed to scatter edges", ANSI_COLOR_RED, rank);
-  //   MPI_Abort(comm, 1);
-  // }
-
-  int *sendcounts = (int *)malloc(size * sizeof(int));
-  int *displs = (int *)malloc(size * sizeof(int));
-
-  for (int i = 0; i < size; i++) {
-    sendcounts[i] = edges_per_proc * 3;
-    displs[i] = i * edges_per_proc * 3;
-  }
-
-  int scatter_res = MPI_Scatterv(g->edges, sendcounts, displs, MPI_UNSIGNED, local_edges, edges_per_proc * 3, MPI_UNSIGNED, 0, comm);
-
-  free(sendcounts);
-  free(displs);
-
+  int scatter_res =
+    MPI_Scatter(g->edges, edges_per_proc * 3, MPI_UNSIGNED, local_edges,
+                edges_per_proc * 3, MPI_UNSIGNED, 0, comm);
   if (scatter_res != MPI_SUCCESS) {
     debug("Failed to scatter edges", ANSI_COLOR_RED, rank);
     MPI_Abort(comm, 1);
   }
-
-  MPI_Barrier(comm);
 
   // safe to free the original edges
   free(g->edges);
@@ -91,8 +71,7 @@ void adj_boruvka(AG *g, AG *mst, int rank, int size, MPI_Comm comm) {
   if (rank == size - 1 && E % edges_per_proc != 0) {
     edges_per_proc = E % edges_per_proc;
   }
-
-  debug("edges_per_proc = %d", ANSI_COLOR_CYAN, rank, edges_per_proc);
+  // debug("edges_per_proc = %d", ANSI_COLOR_CYAN, rank, edges_per_proc);
 
   MFSet *mfset = init_mfset(V);
 
