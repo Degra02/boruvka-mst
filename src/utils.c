@@ -52,9 +52,9 @@ AG* generate_graph(const int V) {
   for (int i = 0, k = 0; i < V; i++) {
     for (int j = i + 1; j < V; j++, k++) {
       fread(&random_value, sizeof(unsigned int), 1, random);
-      g->edges[k].src = i;
-      g->edges[k].dest = j;
-      g->edges[k].w = (random_value % max) + min;
+      g->edges[k*3] = i;
+      g->edges[k*3 + 1] = j;
+      g->edges[k*3 + 2] = (random_value % max) + min;
     }
   }
   debug("Random weights assigned.", ANSI_COLOR_GREEN, 0);
