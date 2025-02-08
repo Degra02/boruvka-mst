@@ -27,7 +27,7 @@ AG *init_adj_graph(const int V, const int E) {
   g->V = V;
   g->E = E;
 
-  g->edges = (Edge *)malloc(E * sizeof(Edge));
+  g->edges = (int *)malloc(E * 3 * sizeof(int));
   // MPI_Alloc_mem(E * 3 * sizeof(int), MPI_INFO_NULL, &g->edges);
   if (g->edges == NULL) {
     fprintf(stderr, "Error: unable to allocate memory for graph's edges\n");
@@ -54,8 +54,8 @@ AG *init_from_file(const char *filename) {
   AG *g = init_adj_graph(V, E);
 
   for (int i = 0; i < E; i++) {
-    fscanf(file, "%d %d %d", &g->edges[i].src, &g->edges[i].dest,
-           &g->edges[i].w);
+    fscanf(file, "%d %d %d", &g->edges[i*3], &g->edges[i*3 + 1],
+           &g->edges[i*3 + 2]);
   }
 
   fclose(file);
@@ -73,8 +73,8 @@ void print_file_adj_graph(AG *g, const char *filename) {
 
   fprintf(file, "%d %d\n", g->V, g->E);
   for (int i = 0; i < g->E; i++) {
-    fprintf(file, "%d %d %d\n", g->edges[i].src, g->edges[i].dest,
-            g->edges[i].w);
+    fprintf(file, "%d %d %d\n", g->edges[i*3], g->edges[i*3 + 1],
+            g->edges[i*3 + 2]);
   }
 
   fclose(file);
@@ -90,9 +90,9 @@ void print_file_mst(AG *mst, const char* filename) {
   int sum = 0;
   fprintf(file, "%d %d\n", mst->V, mst->E);
   for (int i = 0; i < mst->E; i++) {
-    sum += mst->edges[i].w;
-    fprintf(file, "%d %d %d\n", mst->edges[i].src, mst->edges[i].dest,
-            mst->edges[i].w);
+    sum += mst->edges[i*3 + 2];
+    fprintf(file, "%d %d %d\n", mst->edges[i*3], mst->edges[i*3 + 1],
+            mst->edges[i*3 + 2]);
   }
   // fprintf(file, "Total weight: %d\n", sum);
 

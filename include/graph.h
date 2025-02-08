@@ -37,10 +37,16 @@ void create_edge_mpi_type(MPI_Datatype *);
  *
  * @note The `inline` keyword is used to suggest the compiler to replace the function call with the function code, although proper profiling should be done.
 */
-static inline void clone_edge(Edge *from, Edge *to) {
-  to->src = from->src;
-  to->dest = from->dest;
-  to->w = from->w;
+// static inline void clone_edge(Edge *from, Edge *to) {
+//   to->src = from->src;
+//   to->dest = from->dest;
+//   to->w = from->w;
+// }
+
+static inline void clone_edge(int *from, int *to) {
+  to[0] = from[0];
+  to[1] = from[1];
+  to[2] = from[2];
 }
 
 /*
@@ -51,7 +57,7 @@ static inline void clone_edge(Edge *from, Edge *to) {
 */
 typedef struct Adj_Graph {
   int V, E;
-  Edge *edges;
+  int *edges;
 } AG;
 
 /*
