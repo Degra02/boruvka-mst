@@ -38,8 +38,8 @@ void adj_boruvka(AG *g, AG *mst, int rank, int size, MPI_Comm comm) {
   // split edges among processes
   uint32_t edges_per_proc = (E + size - 1) / size;
   Edge *local_edges;
-  // local_edges = (Edge *)malloc(edges_per_proc * sizeof(Edge));
-  MPI_Alloc_mem(edges_per_proc * sizeof(Edge), MPI_INFO_NULL, &local_edges);
+  local_edges = (Edge *)malloc(edges_per_proc * sizeof(Edge));
+  // MPI_Alloc_mem(edges_per_proc * sizeof(Edge), MPI_INFO_NULL, &local_edges);
 
   if (local_edges == NULL) {
     debug("Failed to allocate memory for local edges", ANSI_COLOR_RED, rank);
@@ -51,28 +51,36 @@ void adj_boruvka(AG *g, AG *mst, int rank, int size, MPI_Comm comm) {
   if (rank == 0)
     debug("Starting scatter of edges", ANSI_COLOR_CYAN, rank);
 
-  if (rank == 0) {
-    int scatter_res =
-        MPI_Scatter(g->edges, edges_per_proc, edge_type , local_edges,
-                    edges_per_proc, edge_type, 0, comm);
-    if (scatter_res != MPI_SUCCESS) {
-      debug("Failed to scatter edges", ANSI_COLOR_RED, rank);
-      MPI_Abort(comm, 1);
-    }
-
-    free(g->edges);
-  } else {
-    int scatter_res =
-        MPI_Scatter(NULL, edges_per_proc, edge_type, local_edges,
-                    edges_per_proc, edge_type, 0, comm);
-    if (scatter_res != MPI_SUCCESS) {
-      debug("Failed to scatter edges", ANSI_COLOR_RED, rank);
-      MPI_Abort(comm, 1);
-    }
+  int scatter_res =
+      MPI_Scatter(g->edges, edges_per_proc, edge_type, local_edges,
+                  edges_per_proc, edge_type, 0, comm);
+  if (scatter_res != MPI_SUCCESS) {
+    debug("Failed to scatter edges", ANSI_COLOR_RED, rank);
+    MPI_Abort(comm, 1);
   }
 
+  // if (rank == 0) {
+  //   int scatter_res =
+  //       MPI_Scatter(g->edges, edges_per_proc, edge_type , local_edges,
+  //                   edges_per_proc, edge_type, 0, comm);
+  //   if (scatter_res != MPI_SUCCESS) {
+  //     debug("Failed to scatter edges", ANSI_COLOR_RED, rank);
+  //     MPI_Abort(comm, 1);
+  //   }
+  //
+  //   free(g->edges);
+  // } else {
+  //   int scatter_res =
+  //       MPI_Scatter(NULL, edges_per_proc, edge_type, local_edges,
+  //                   edges_per_proc, edge_type, 0, comm);
+  //   if (scatter_res != MPI_SUCCESS) {
+  //     debug("Failed to scatter edges", ANSI_COLOR_RED, rank);
+  //     MPI_Abort(comm, 1);
+  //   }
+  // }
+
   if (rank != 0)
-    debug("Finished receiviintng edges", ANSI_COLOR_GREEN, rank);
+    debug("Finished receiving edges", ANSI_COLOR_GREEN, rank);
 
   if (rank == size - 1 && E % edges_per_proc != 0) {
     edges_per_proc = E % edges_per_proc;
@@ -170,14 +178,14 @@ void adj_boruvka(AG *g, AG *mst, int rank, int size, MPI_Comm comm) {
     }
   }
 
-  MPI_Free_mem(local_edges);
+  // MPI_Free_mem(local_edges);
   MPI_Free_mem(closest);
   MPI_Free_mem(closest_local);
 
   free_mfset(mfset);
   // free(closest);
   // free(closest_local);
-  // free(local_edges);
+  free(local_edges);
 }
 
 // #pragma omp parallel
