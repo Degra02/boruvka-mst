@@ -64,41 +64,50 @@ void adj_boruvka(AG *g, AG *mst, int rank, int size, MPI_Comm comm) {
   //   MPI_Abort(comm, 1);
   // }
 
-  int *sendcounts = (int *)malloc(size * sizeof(int));
-  int *displs = (int *)malloc(size * sizeof(int));
-  
-  uint32_t remaining_edges = E;
-  for (int i = 0; i < size; i++) {
-    if (remaining_edges >= edges_per_proc) {
+  if (size > 1) {
+    if (rank == 0) debug("Size == %d", ANSI_COLOR_CYAN, rank, size);
+    int *sendcounts = (int *)malloc(size * sizeof(int));
+    int *displs = (int *)malloc(size * sizeof(int));
+
+    uint32_t remaining_edges = E;
+    for (int i = 0; i < size; i++) {
+      if (remaining_edges >= edges_per_proc) {
+        sendcounts[i] = edges_per_proc * 3;
+        displs[i] = (i * edges_per_proc * 3);
+        remaining_edges -= edges_per_proc;
+      } else {
+        sendcounts[i] = remaining_edges * 3;
+        displs[i] = (i * edges_per_proc * 3);
+        remaining_edges = 0;
+      }
+    }
+
+    MPI_Barrier(comm);
+
+    for (int i = 0; i < size; i++) {
       sendcounts[i] = edges_per_proc * 3;
-      displs[i] = (i * edges_per_proc * 3);
-      remaining_edges -= edges_per_proc;
-    } else {
-      sendcounts[i] = remaining_edges * 3;
-      displs[i] = (i * edges_per_proc * 3);
-      remaining_edges = 0;
+      displs[i] = i * edges_per_proc * 3;
+    }
+
+    int scatter_res = MPI_Scatterv(g->edges, sendcounts, displs, MPI_UNSIGNED, local_edges, edges_per_proc * 3, MPI_UNSIGNED, 0, comm);
+
+    free(sendcounts);
+    free(displs);
+
+    if (scatter_res != MPI_SUCCESS) {
+      debug("Failed to scatter edges", ANSI_COLOR_RED, rank);
+      MPI_Abort(comm, 1);
+    }
+
+
+    MPI_Barrier(comm);
+
+  } else {
+    debug("Size == 1", ANSI_COLOR_CYAN, rank);
+    for (uint32_t i = 0; i < E; i++) {
+      local_edges[i] = g->edges[i];
     }
   }
-
-  MPI_Barrier(comm);
-
-  for (int i = 0; i < size; i++) {
-    sendcounts[i] = edges_per_proc * 3;
-    displs[i] = i * edges_per_proc * 3;
-  }
-
-  int scatter_res = MPI_Scatterv(g->edges, sendcounts, displs, MPI_UNSIGNED, local_edges, edges_per_proc * 3, MPI_UNSIGNED, 0, comm);
-  
-  free(sendcounts);
-  free(displs);
-
-  if (scatter_res != MPI_SUCCESS) {
-    debug("Failed to scatter edges", ANSI_COLOR_RED, rank);
-    MPI_Abort(comm, 1);
-  }
-
-
-  MPI_Barrier(comm);
 
   // safe to free the original edges
   free(g->edges);
