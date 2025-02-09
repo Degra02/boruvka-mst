@@ -11,3 +11,8 @@ graph_images/
 perf.data
 
 *.tape
+
+launch.sh
+multiple_boruvka.sh
+
+results/

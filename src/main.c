@@ -9,13 +9,13 @@
 
 double program_start_time;
 int verbose = 0;
-int max = 50000;
-int min = 1;
+uint32_t max = 50000;
+uint32_t min = 1;
 
 int main(int argc, char *argv[]) {
   srand(time(NULL));
 
-  int gen = 0;
+  uint32_t gen = 0;
   int save = 0;
   int save_output = 0;
   char *input = malloc(256 * sizeof(char));
@@ -70,7 +70,8 @@ int main(int argc, char *argv[]) {
         break;
 
       default:
-        g = generate_graph(gen);
+        // g = generate_graph(gen, 0.5);
+        g = generate_complete_graph(gen);
         if (save) { 
           debug("Saving graph to %s ...", ANSI_COLOR_YELLOW, rank, input);
           print_file_adj_graph(g, input); 
@@ -95,6 +96,7 @@ int main(int argc, char *argv[]) {
 
   debug("V = %d, E = %d", ANSI_COLOR_CYAN, rank, g->V, g->E);
   mst = init_adj_graph(g->V, g->V - 1);
+
   // not needed but just to be sure
   MPI_Barrier(MPI_COMM_WORLD);
   // debug("Process reached barrier", ANSI_COLOR_YELLOW, rank);
@@ -106,8 +108,7 @@ int main(int argc, char *argv[]) {
 
   if (rank == 0) {
     double end_time = MPI_Wtime();
-    // printf("[END] %s MST Time: %f %s\n", ANSI_COLOR_BLUE, end_time - start_time, ANSI_COLOR_RESET);
-    printf("%f\n", end_time - start_time);
+    printf("%15s: %20lf\n", "tot", end_time - start_time);
 
     if (save || save_output) print_file_mst(mst, output);
   }

@@ -27,7 +27,7 @@ AG *init_adj_graph(const uint32_t V, const uint32_t E) {
   g->V = V;
   g->E = E;
 
-  g->edges = (uint32_t *)calloc(E * 3, sizeof(uint32_t));
+  g->edges = (uint32_t *)malloc(E * 3 * sizeof(uint32_t));
   // MPI_Alloc_mem(E * 3 * sizeof(int), MPI_INFO_NULL, &g->edges);
   if (g->edges == NULL) {
     fprintf(stderr, "Error: unable to allocate memory for graph's edges\n");
@@ -42,6 +42,15 @@ void free_adj_graph(AG *g) {
   free(g);
 }
 
+void clone_edge(uint32_t *from, uint32_t *to) {
+  to[0] = from[0];
+  to[1] = from[1];
+  to[2] = from[2];
+
+  // memcpy(to, from, 3 * sizeof(uint32_t));
+}
+
+
 AG *init_from_file(const char *filename) {
   FILE *file = fopen(filename, "r");
   if (file == NULL) {
@@ -50,11 +59,11 @@ AG *init_from_file(const char *filename) {
   }
 
   uint32_t V, E;
-  fscanf(file, "%d %d", &V, &E);
+  fscanf(file, "%u %u", &V, &E);
   AG *g = init_adj_graph(V, E);
 
   for (uint32_t i = 0; i < E; i++) {
-    fscanf(file, "%d %d %d", &g->edges[i*3], &g->edges[i*3 + 1],
+    fscanf(file, "%u %u %u", &g->edges[i*3], &g->edges[i*3 + 1],
            &g->edges[i*3 + 2]);
   }
 
@@ -71,9 +80,9 @@ void print_file_adj_graph(AG *g, const char *filename) {
     exit(1);
   }
 
-  fprintf(file, "%d %d\n", g->V, g->E);
+  fprintf(file, "%u %u\n", g->V, g->E);
   for (uint32_t i = 0; i < g->E; i++) {
-    fprintf(file, "%d %d %d\n", g->edges[i*3], g->edges[i*3 + 1],
+    fprintf(file, "%u %u %u\n", g->edges[i*3], g->edges[i*3 + 1],
             g->edges[i*3 + 2]);
   }
 
@@ -87,11 +96,11 @@ void print_file_mst(AG *mst, const char* filename) {
     exit(1);
   }
 
-  int sum = 0;
-  fprintf(file, "%d %d\n", mst->V, mst->E);
+  // int sum = 0;
+  fprintf(file, "%u %u\n", mst->V, mst->E);
   for (uint32_t i = 0; i < mst->E; i++) {
-    sum += mst->edges[i*3 + 2];
-    fprintf(file, "%d %d %d\n", mst->edges[i*3], mst->edges[i*3 + 1],
+    // sum += mst->edges[i*3 + 2];
+    fprintf(file, "%u %u %u\n", mst->edges[i*3], mst->edges[i*3 + 1],
             mst->edges[i*3 + 2]);
   }
   // fprintf(file, "Total weight: %d\n", sum);

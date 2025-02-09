@@ -43,8 +43,8 @@ uint32_t find(MFSet *mfset, const uint32_t x) {
 }
 
 void unite(MFSet *mfset, const uint32_t x, const uint32_t y) {
-  int x_root = find(mfset, x);
-  int y_root = find(mfset, y);
+  uint32_t x_root = find(mfset, x);
+  uint32_t y_root = find(mfset, y);
 
   if (x_root == y_root) {
     return;

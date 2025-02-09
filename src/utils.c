@@ -6,8 +6,8 @@
 
 extern double program_start_time;
 extern int verbose;
-extern int max;
-extern int min;
+extern uint32_t max;
+extern uint32_t min;
 
 void debug(const char *format, const char *color, const int rank, ...) {
   if (verbose) {
@@ -26,18 +26,18 @@ void debug(const char *format, const char *color, const int rank, ...) {
   }
 }
 
-unsigned int get_random() {
-    unsigned int random_value;
+uint32_t get_random() {
+    uint32_t random_value;
     __asm__ __volatile__ (
         "rdrand %0"
         : "=r"(random_value)
-        : 
+        :
         : "cc"
     );
     return random_value;
 }
 
-AG* generate_graph(const int V) {
+AG* generate_complete_graph(const uint32_t V) {
   AG *g = init_adj_graph(V, V * (V - 1) / 2);
   debug("Generating graph. V = %d, E = %d", ANSI_COLOR_GREEN, 0, V, V * (V - 1) / 2);
 
@@ -48,13 +48,13 @@ AG* generate_graph(const int V) {
   }
 
   debug("Assigning random weights...", ANSI_COLOR_YELLOW, 0);
-  unsigned int random_value;
-  for (int i = 0, k = 0; i < V; i++) {
-    for (int j = i + 1; j < V; j++, k++) {
-      fread(&random_value, sizeof(unsigned int), 1, random);
+  uint32_t random_value;
+  for (uint32_t i = 0, k = 0; i < V; i++) {
+    for (uint32_t j = i + 1; j < V; j++, k++) {
+      random_value = rand() % (max - min + 1) + min;
       g->edges[k*3] = i;
       g->edges[k*3 + 1] = j;
-      g->edges[k*3 + 2] = (random_value % max) + min;
+      g->edges[k*3 + 2] = random_value;
     }
   }
   debug("Random weights assigned.", ANSI_COLOR_GREEN, 0);
@@ -62,8 +62,48 @@ AG* generate_graph(const int V) {
   return g;
 }
 
+AG* generate_graph(const uint32_t V, const double density) {
+  // maximum number of edges
+  AG *temp = init_adj_graph(V, V * (V - 1) / 2);
+
+  FILE *random = fopen("/dev/urandom", "r");
+  if (random == NULL) {
+    fprintf(stderr, "Error opening /dev/urandom.\n");
+    exit(1);
+  }
+
+  debug("Assigning random weights...", ANSI_COLOR_YELLOW, 0);
+  uint32_t random_value;
+  for (uint32_t i = 0, k = 0; i < V; i++) {
+    for (uint32_t j = i + 1; j < V; j++, k++) {
+      fread(&random_value, sizeof(unsigned int), 1, random);
+      temp->edges[k*3] = i;
+      temp->edges[k*3 + 1] = j;
+      temp->edges[k*3 + 2] = (random_value % max) + min;
+    }
+  }
+
+  // number of edges of new graph
+  uint32_t E = (uint32_t)(V * (V - 1) / 2 * density);
+
+  AG *g = init_adj_graph(V, E);
+  debug("Generating graph. V = %d, E = %d", ANSI_COLOR_GREEN, 0, V, E);
+
+  // remove some edges from temp graph
+  for (uint32_t i = 0; i < E; i++) {
+    uint32_t random_edge = get_random() % (V * (V - 1) / 2);
+    g->edges[i*3] = temp->edges[random_edge*3];
+    g->edges[i*3 + 1] = temp->edges[random_edge*3 + 1];
+    g->edges[i*3 + 2] = temp->edges[random_edge*3 + 2];
+  }
+
+  free_adj_graph(temp);
+  return g;
+}
+
+
 void Bcast_adj_graph(AG **g, MPI_Comm comm) {
-  int V, E;
+  uint32_t V, E;
   if ((*g) != NULL) {
     debug("Broadcasting graph V = %d, E = %d", ANSI_COLOR_YELLOW, 0, (*g)->V, (*g)->E);
     V = (*g)->V;

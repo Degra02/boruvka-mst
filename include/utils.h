@@ -31,14 +31,17 @@ void debug(const char *, const char *, const int, ...);
  * @return Random number.
  * @note This function has to be tested to check if it provides a "more random" number than rand().
  */
-unsigned int get_random();
+uint32_t get_random();
 
 /*
  * Generate a complete graph with V vertices, without saving it to a file.
  * @param V Number of vertices.
  * @param g Pointer to the adjacency graph.
  */
-AG* generate_graph(const int);
+AG* generate_complete_graph(const uint32_t);
+
+AG* generate_graph(const uint32_t, const double);
+
 
 /*
  * Broadcasts an adjacency graph.

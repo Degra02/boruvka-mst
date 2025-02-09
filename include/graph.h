@@ -11,6 +11,7 @@
 */
 #include <mpi.h>
 #include <stdint.h>
+#include <string.h>
 typedef struct M_Graph {
   int V, E;
   int **adj;
@@ -44,11 +45,7 @@ void create_edge_mpi_type(MPI_Datatype *);
 //   to->w = from->w;
 // }
 
-static inline void clone_edge(uint32_t *from, uint32_t *to) {
-  to[0] = from[0];
-  to[1] = from[1];
-  to[2] = from[2];
-}
+void clone_edge(uint32_t *from, uint32_t *to);
 
 /*
  * Graph in adjacency list format.

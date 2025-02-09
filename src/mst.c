@@ -27,19 +27,21 @@ void adj_boruvka(AG *g, AG *mst, int rank, int size, MPI_Comm comm) {
   V = g->V;
   E = g->E;
 
-  // if (rank == 0) {
-  //   MPI_Bcast(&V, 1, MPI_INT, 0, comm);
-  //   MPI_Bcast(&E, 1, MPI_INT, 0, comm);
-  // } else {
-  //   MPI_Bcast(&V, 1, MPI_INT, 0, comm);
-  //   MPI_Bcast(&E, 1, MPI_INT, 0, comm);
-  // }
+  if (rank == 0) {
+    MPI_Bcast(&V, 1, MPI_INT, 0, comm);
+    MPI_Bcast(&E, 1, MPI_INT, 0, comm);
+  } else {
+    MPI_Bcast(&V, 1, MPI_INT, 0, comm);
+    MPI_Bcast(&E, 1, MPI_INT, 0, comm);
+  }
+  
+  double start = MPI_Wtime();
 
   // split edges among processes
   uint32_t edges_per_proc = (E + size - 1) / size;
   uint32_t *local_edges;
-  local_edges = (uint32_t *)malloc(edges_per_proc * 3 * sizeof(uint32_t));
-  // MPI_Alloc_mem(edges_per_proc * sizeof(Edge), MPI_INFO_NULL, &local_edges);
+  // local_edges = (uint32_t *)malloc(edges_per_proc * 3 * sizeof(uint32_t));
+  MPI_Alloc_mem(edges_per_proc * 3 * sizeof(uint32_t), MPI_INFO_NULL, &local_edges);
 
   if (local_edges == NULL) {
     debug("Failed to allocate memory for local edges", ANSI_COLOR_RED, rank);
@@ -49,10 +51,10 @@ void adj_boruvka(AG *g, AG *mst, int rank, int size, MPI_Comm comm) {
   }
 
   // barrier to ensure all processes are ready to receive the edges
-  MPI_Barrier(comm);
+  // MPI_Barrier(comm);
 
   if (rank == 0)
-    debug("Starting scatter of edges", ANSI_COLOR_CYAN, rank);
+    debug("Starting scatter of edges\n", ANSI_COLOR_CYAN, rank);
 
   // int scatter_res =
   //   MPI_Scatter(g->edges, edges_per_proc * 3, MPI_UNSIGNED, local_edges,
@@ -64,6 +66,21 @@ void adj_boruvka(AG *g, AG *mst, int rank, int size, MPI_Comm comm) {
 
   int *sendcounts = (int *)malloc(size * sizeof(int));
   int *displs = (int *)malloc(size * sizeof(int));
+  
+  uint32_t remaining_edges = E;
+  for (int i = 0; i < size; i++) {
+    if (remaining_edges >= edges_per_proc) {
+      sendcounts[i] = edges_per_proc * 3;
+      displs[i] = (i * edges_per_proc * 3);
+      remaining_edges -= edges_per_proc;
+    } else {
+      sendcounts[i] = remaining_edges * 3;
+      displs[i] = (i * edges_per_proc * 3);
+      remaining_edges = 0;
+    }
+  }
+
+  MPI_Barrier(comm);
 
   for (int i = 0; i < size; i++) {
     sendcounts[i] = edges_per_proc * 3;
@@ -71,7 +88,7 @@ void adj_boruvka(AG *g, AG *mst, int rank, int size, MPI_Comm comm) {
   }
 
   int scatter_res = MPI_Scatterv(g->edges, sendcounts, displs, MPI_UNSIGNED, local_edges, edges_per_proc * 3, MPI_UNSIGNED, 0, comm);
-
+  
   free(sendcounts);
   free(displs);
 
@@ -79,6 +96,7 @@ void adj_boruvka(AG *g, AG *mst, int rank, int size, MPI_Comm comm) {
     debug("Failed to scatter edges", ANSI_COLOR_RED, rank);
     MPI_Abort(comm, 1);
   }
+
 
   MPI_Barrier(comm);
 
@@ -92,6 +110,11 @@ void adj_boruvka(AG *g, AG *mst, int rank, int size, MPI_Comm comm) {
     edges_per_proc = E % edges_per_proc;
   }
 
+  if (rank == 0) { 
+    printf("%15s: %20lf\n", "scatter time", MPI_Wtime() - start);
+  }
+  start = MPI_Wtime();
+
   debug("edges_per_proc = %d", ANSI_COLOR_CYAN, rank, edges_per_proc);
 
   MFSet *mfset = init_mfset(V);
@@ -103,15 +126,16 @@ void adj_boruvka(AG *g, AG *mst, int rank, int size, MPI_Comm comm) {
   closest_local = (uint32_t *)malloc(V * 3 * sizeof(uint32_t));
 
   debug("Allocating memory for closest edges", ANSI_COLOR_CYAN, rank);
-  // MPI_Alloc_mem(V * 3 * sizeof(int), MPI_INFO_NULL, &closest);
-  // MPI_Alloc_mem(V * 3 * sizeof(int), MPI_INFO_NULL, &closest_local);
+  // MPI_Alloc_mem(V * 3 * sizeof(uint32_t), MPI_INFO_NULL, &closest);
+  // MPI_Alloc_mem(V * 3 * sizeof(uint32_t), MPI_INFO_NULL, &closest_local);
+
 
   MPI_Barrier(comm);
 
   for (uint32_t i = 1; i < V && mst_edges < V - 1; i *= 2) {
     #pragma omp parallel for
     for (uint32_t j = 0; j < V; j++) {
-      closest[j*3 + 2] = INT_MAX;  
+      closest[j*3 + 2] = UINT32_MAX;  
     }
 
     // search for the closest edge
@@ -126,12 +150,12 @@ void adj_boruvka(AG *g, AG *mst, int rank, int size, MPI_Comm comm) {
         continue;
       }
 
-      if (e[2] < closest[root_src*3 + 2]) {
+      if (closest[root_src * 3 + 2] == UINT32_MAX ||  e[2] < closest[root_src*3 + 2]) {
         #pragma omp critical
         clone_edge(e, &closest[root_src * 3]);
       }
 
-      if (e[2] < closest[root_dest*3 + 2]) {
+      if (closest[root_dest * 3 + 2] == UINT32_MAX ||  e[2] < closest[root_dest*3 + 2]) {
         #pragma omp critical
         clone_edge(e, &closest[root_dest * 3]);
       }
@@ -145,9 +169,6 @@ void adj_boruvka(AG *g, AG *mst, int rank, int size, MPI_Comm comm) {
         if (from < size) {
           MPI_Recv(closest_local, V * 3, MPI_UNSIGNED, from, 0, comm,
                    MPI_STATUS_IGNORE);
-          // MPI_Irecv(closest_local, V * 3, MPI_INT, from, 0, comm,
-          //           &request);
-          // MPI_Wait(&request, MPI_STATUS_IGNORE);
 
           // static scheduling seems to be the best option, as the workload
           // is the same for each iteration
@@ -170,14 +191,14 @@ void adj_boruvka(AG *g, AG *mst, int rank, int size, MPI_Comm comm) {
     MPI_Bcast(closest, V * 3, MPI_UNSIGNED, 0, comm);
 
     for (uint32_t j = 0; j < V; j++) {
-      if (closest[j*3 + 2] != INT_MAX) {
+      if (closest[j*3 + 2] != UINT32_MAX) {
         {
           uint32_t root_src = find(mfset, closest[j*3]);
           uint32_t root_dest = find(mfset, closest[j*3 + 1]);
 
           if (root_src != root_dest) {
-            clone_edge(&closest[j], &mst->edges[mst_edges]);
-            mst_edges++;
+            clone_edge(&closest[j], &mst->edges[mst_edges * 3]);
+            mst_edges ++;
             unite(mfset, root_src, root_dest);
           }
         }
@@ -185,82 +206,21 @@ void adj_boruvka(AG *g, AG *mst, int rank, int size, MPI_Comm comm) {
     }
   }
 
-  // MPI_Free_mem(local_edges);
-  // MPI_Free_mem(closest);
-  // MPI_Free_mem(closest_local);
+  // if (rank == 0) {
+  //   for(uint32_t i = 0; i < E; i++) {
+  //     printf("%u %u %u\n", mst->edges[i*3], mst->edges[i*3 + 1], mst->edges[i*3 + 2]);
+  //   }
+  // }
+
+
+  if (rank == 0) printf("%15s: %20lf\n", "mst time", MPI_Wtime() - start);
+
+  MPI_Free_mem(local_edges);
+  MPI_Free_mem(closest);
+  MPI_Free_mem(closest_local);
 
   free_mfset(mfset);
-  free(closest);
-  free(closest_local);
-  free(local_edges);
+  // free(closest);
+  // free(closest_local);
+  // free(local_edges);
 }
-
-// #pragma omp parallel
-// {
-//   Edge *local_closest = (Edge *)malloc(V * sizeof(Edge));
-//   for(int j = 0; j < V; j++) {
-//     local_closest[j].w = INT_MAX;
-//   }
-//
-//   #pragma omp for
-//   for(int j = 0; j < edges_per_proc; j++) {
-//     Edge e = local_edges[j];
-//
-//     int root_src = find(mfset, e.src);
-//     int root_dest = find(mfset, e.dest);
-//
-//     if (root_src != root_dest) {
-//       if (e.w < local_closest[root_src].w) {
-//         clone_edge(&e, &local_closest[root_src]);
-//       }
-//
-//       if (e.w < local_closest[root_dest].w) {
-//         clone_edge(&e, &local_closest[root_dest]);
-//       }
-//     }
-//   }
-//
-//   #pragma omp critical
-//   {
-//     for(int j = 0; j < V; j++) {
-//       if(local_closest[j].w < closest[j].w) {
-//         clone_edge(&local_closest[j], &closest[j]);
-//       }
-//     }
-//   }
-//   free(local_closest);
-// }
-
-// #ifdef _OPENMP
-
-// int *mst_edge_counts = (int *)calloc(omp_get_max_threads(), sizeof(int));
-//
-// #pragma omp parallel
-// {
-//   int thread_id = omp_get_thread_num();
-//   int local_mst_edges = 0;
-//
-//   #pragma omp for
-//   for (int j = 0; j < V; j++) {
-//     if (closest[j].w != INT_MAX) {
-//       int root_src = find(mfset, closest[j].src);
-//       int root_dest = find(mfset, closest[j].dest);
-//
-//       if (root_src != root_dest) {
-//         clone_edge(&closest[j], &mst->edges[mst_edges + local_mst_edges]);
-//         local_mst_edges++;
-//         unite(mfset, root_src, root_dest);
-//       }
-//     }
-//   }
-//
-//   mst_edge_counts[thread_id] = local_mst_edges;
-// }
-//
-// for(int j = 1; j < omp_get_max_threads(); j++) {
-//   mst_edge_counts[j] += mst_edge_counts[j - 1];
-// }
-//
-// mst_edges += mst_edge_counts[omp_get_max_threads() - 1];
-// free(mst_edge_counts);
-// #endif
